@@ -5,7 +5,7 @@ from torch_geometric.loader import DataLoader
 from loadData import GraphDataset
 import pandas as pd 
 from goto_the_gym import train
-import utilities
+from utilities import create_dirs save_checkpoint
 
 
 def evaluate(data_loader, model, device, calculate_accuracy=False):
@@ -33,7 +33,7 @@ def main(args):
     print("device:", device)
 
     # create directories
-    utilities.create_dirs()
+    create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim = 300 
@@ -66,7 +66,7 @@ def main(args):
         # Save the checkpoint - call external function
         test_dir_name = os.path.basename(os.path.dirname(args.test_path))
         # INSERIRE IF BEST ACCURACY OR COUNTER < 5
-        utilities.save_checkpoint(model, test_dir_name, epoch)
+        save_checkpoint(model, test_dir_name, epoch)
 
         # SAVE LOGS EACH 10 EPOCHS TO BE COMPLETED 
         #logs/: Log files for each training dataset. Include logs of accuracy and loss recorded every 10 epochs.
