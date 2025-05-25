@@ -7,7 +7,7 @@ from torch_geometric.utils import to_dense_adj
 # Encoder class
 class VGAE_encoder(nn.Module):   #- DA FARE CHECK 
     def __init__(self, in_dim, hid_dim, lat_dim):
-        super().__init()
+        super().__init__()
         self.conv1 = GCNConv(in_dim, hid_dim)
         self.conv_mu = GCNConv(hid_dim, lat_dim)
         self.conv_logvar = GCNConv(hid_dim, lat_dim)  
