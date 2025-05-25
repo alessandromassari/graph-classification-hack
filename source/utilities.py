@@ -2,6 +2,10 @@ import os
 import logging
 from typing import Tuple
 
+def add_zeros(data):
+    data.x = torch.zeros(data.num_nodes, dtype=torch.long)  
+    return data
+    
 def create_dirs():
     directories = ['checkpoints','logs']
     for dir in directories:
