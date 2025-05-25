@@ -6,7 +6,7 @@ from loadData import GraphDataset
 import pandas as pd 
 from goto_the_gym import train
 from utilities import create_dirs, save_checkpoint
-
+from my_model import VGAE_all
 
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
