@@ -20,7 +20,7 @@ def train(model, td_loader, optimizer, device, kl_weight=0.2):
         kl_term_loss = kl_loss(mu, logvar)
         
         # reconstruction loss is a little bit more complex
-        true_adj = to_dense_adj(data.edge_index, batch=data,batch)
+        true_adj = to_dense_adj(data.edge_index, batch=data.batch)
         reconstruction_loss = 0.0
         first = 0
         for batch_id in range(true_adj.size(0)):

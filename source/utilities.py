@@ -1,4 +1,5 @@
 import os
+import torch
 import logging
 from typing import Tuple
 
@@ -8,15 +9,15 @@ def add_zeros(data):
     
 def create_dirs():
     directories = ['checkpoints','logs']
-    for dir in directories:
+    for directory in directories:
         os.makedirs(directory, exist_ok= True)
-
-#def set_logging(test_path: )
+# LOGGING FORSE DA IMPLEMENTARE DIRETTAMENTE IN MAIN TRAMITE LOGGING LIB
+#def set_logging(model, test_dir_name, ep: int)
+#    filename = f"logs/model_{test_dir_name}_epoch_{ep}.pth"
+#   print(f"Checkpoint saved to {filename}")
 
                 
-def save_checkpoint(model, test_dir_name: str, ep: int)
-                filename = f"checkpoints/model_{test_dir_name}_epoch_{ep}.pth"
-                torch.save(model.state_dict(), filename)
-                print(f"Checkpoint saved to {filename})
-    
-
+def save_checkpoint(model, test_dir_name: str, ep: int):
+            filename = f"checkpoints/model_{test_dir_name}_epoch_{ep}.pth"
+            torch.save(model.state_dict(), filename)
+            print(f"Checkpoint saved to {filename}")

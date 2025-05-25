@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GNCConv, global_mean_pool
+from torch_geometric.nn import GCNConv, global_mean_pool
 from torch_geometric.utils import to_dense_adj
 
 # Encoder class
@@ -35,7 +35,6 @@ def reparametrize(mu, logvar):
     eps = torch.randn_like(std)
     return mu + eps*std
 
-    
 # final class all the model here   - DA FARE CHECK 
 class VGAE_all(nn.Module):
     def __init__(self, in_dim, hid_dim, lat_dim, out_classes):
@@ -57,4 +56,4 @@ class VGAE_all(nn.Module):
         # pooling
         graph_embedding = global_mean_pool(z, batch)
         class_logits = self.classifier(graph_embedding)
-        return out adj_pred, mu, logvar, class_logits
+        return adj_pred, mu, logvar, class_logits

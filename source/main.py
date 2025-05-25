@@ -78,8 +78,7 @@ def main(args):
         # raise an error if not able to find the checkpoint model
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"Checkpoint not found! {checkpoint_path}")
-        state = toarch.load(checkpoint_path, map_location=device)
-        model.load_state_dict(state['model_state_dict'])
+        model.load_state_dict(checkpoint['model_state_dict'])
         print(f">> Loading pre-training model from: {checkpoint_path}")
           
     # Evaluate and save test predictions
