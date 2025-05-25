@@ -33,14 +33,14 @@ def main(args):
     print("device:", device)
 
     # create directories
-    create_dirs()
+    utilities.create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim = 300 
     hid_dim = 64
     lat_dim = 8  #16
     out_classes = 6  
-    num_epoches: int = 5 # 100
+    num_epoches: int = 100 # 100
     
     # Initialize the model and choose the optimizer
     model = VGAE_all(in_dim, hid_dim, lat_dim, out_classes).to(device)
@@ -66,7 +66,7 @@ def main(args):
         # Save the checkpoint - call external function
         test_dir_name = os.path.basename(os.path.dirname(args.test_path))
         # INSERIRE IF BEST ACCURACY OR COUNTER < 5
-        save_checkpoint(model, test_dir_name, epoch)
+        utilities.save_checkpoint(model, test_dir_name, epoch)
 
         # SAVE LOGS EACH 10 EPOCHS TO BE COMPLETED 
         #logs/: Log files for each training dataset. Include logs of accuracy and loss recorded every 10 epochs.
