@@ -4,6 +4,15 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, global_mean_pool
 from torch_geometric.utils import to_dense_adj
 
+# node features gen class - mi piaceva metterla qui anche se è più "data preparation"
+class gen_node_features():
+    def __init__(self, feat_dim):
+        self.feat_dim = feat_dim
+    def __forward__(self, data):
+        num_nodes = data.num_modes hasattr(data, 'num_nodes') and data.num_nodes is not None else data.edge_index.max().item() + 1
+        data.x = torch.zeros((num_nodes, self.feat_dim), dtype=torch.float)
+        return data
+
 # Encoder class
 class VGAE_encoder(nn.Module):   #- DA FARE CHECK 
     def __init__(self, in_dim, hid_dim, lat_dim):
@@ -27,8 +36,9 @@ class VGAE_decoder(nn.Module):
 
 # our beloved Kullback-Leibler term
 def kl_loss(mu, logvar):
-    # QUI POSSIAMO PENSARE DI MODIFICARE QUALCOSINA INSERENDO DI LIMITI SUL LOGVAR VALUE MA FORSE NON SERVE
-    return -0.5 * torch.mean(1 + logvar -mu.pow(2) - logvar.exp())
+    # clip logvar to avoid extreme values 
+    clip_logvar = torch.clamp(logvar, min=-5.0, max=5.0) 
+    return -0.5 * torch.mean(1 + clip_logvar -mu.pow(2) - clip_logvar.exp())
 
 def reparametrize(mu, logvar):
     std = torch.exp(0.5 * logvar)
@@ -44,6 +54,7 @@ class VGAE_all(nn.Module):
         self.classifier = nn.Sequential(
             nn.Linear(lat_dim, 64),
             nn.ReLU(),
+            # add a 10% dropout to avoid/mitigate overfitting - try diff values 
             nn.Dropout(0.1),
             nn.Linear(64, out_classes)
         )
