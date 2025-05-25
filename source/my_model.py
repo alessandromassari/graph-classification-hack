@@ -19,7 +19,7 @@ class VGAE_encoder(nn.Module):   #- DA FARE CHECK
         return mu, logvar
 
 # Decoder class
-class GAE_decoder(nn.Module):
+class VGAE_decoder(nn.Module):
 
     def forward(self, z):
         adj_pred = torch.sigmoid(torch.mm(z, z.t()))
