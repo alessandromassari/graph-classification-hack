@@ -13,7 +13,13 @@ def train(model, td_loader, optimizer, device, kl_weight=0.2):
         data = data.to(device)
         # reset the gradients each batch 
         optimizer.zero_grad()
+        
+        #DEBUG PRINT
+        print(f"Shape of data.x: {data.x.shape}")
+        print(f"Shape of data.edge_index: {data.edge_index.shape}")
 
+        if data.x.dim() == 1:
+            data.x = data.x.unsqueeze(1)
         adj_pred, mu, logvar, class_logits = model(data.x, data.edge_index, data.batch)
 
         classification_loss = F.cross_entropy(class_logits, data.y)
