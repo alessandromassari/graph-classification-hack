@@ -40,7 +40,7 @@ def reparametrize(mu, logvar):
     eps = torch.randn_like(std)
     return mu + eps*std
 
-# final class all the model here   - DA FARE CHECK 
+# final class all the model here   - neew release: flag for split the model and pretrain
 class VGAE_all(nn.Module):
     def __init__(self, in_dim, hid_dim, lat_dim, out_classes):
         super().__init__()
@@ -53,13 +53,21 @@ class VGAE_all(nn.Module):
             nn.Dropout(0.1),
             nn.Linear(64, out_classes)
         )
-
-    def forward(self, x, edge_index, batch):
+    #  maybe possiamo inserire qui la parte di concatenazione in decoder invece di goto_the_gym.py
+    def forward(self, x, edge_index, batch, enable_classifier=True):
         mu, logvar = self.encoder(x, edge_index)
         z = reparametrize(mu, logvar)
-        adj_pred = self.decoder(z)                # check se serve
+        adj_pred = self.decoder(z)                # check se serve -
 
-        # pooling
-        graph_embedding = global_mean_pool(z, batch)
-        class_logits = self.classifier(graph_embedding)
+        # pooling if classifier was enabled: in pre-training we work only with VGAE
+        if enable_classifier:
+            graph_embedding = global_mean_pool(z, batch)
+            class_logits = self.classifier(graph_embedding)
+        else:
+            class_logits = None
+            
         return adj_pred, mu, logvar, class_logits
+
+
+
+        

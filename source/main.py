@@ -4,7 +4,7 @@ import torch
 from torch_geometric.loader import DataLoader
 from loadData import GraphDataset
 import pandas as pd 
-from goto_the_gym import train
+from goto_the_gym import pretraining, train
 from utilities import create_dirs, save_checkpoint, add_zeros
 from my_model import VGAE_all, gen_node_features
 
@@ -39,12 +39,14 @@ def main(args):
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim = 128
     hid_dim = 64
-    lat_dim = 8  #16
+    lat_dim = 8            # 16
     out_classes = 6  
-    num_epoches: int = 10 #previous val: 10
-    learning_rate = 0.0005 #previous val: 0.001
-    bas = 32 #batch size: #previous val: 64 
-    kl_weight_max = 0.01 # weight for KL loss
+    pretrain_epoches = 20  # previous val: 10
+    num_epoches: int = 10  # previous val: 10
+    learning_rate = 0.0005 # previous val: 0.001
+    bas = 32 #batch size:  # previous val: 64 
+    kl_weight_max = 0.01   # weight for KL loss
+    an_ep_kl = 20
     torch.manual_seed(0)
 
     # Initialize the model and choose the optimizer
@@ -68,10 +70,19 @@ def main(args):
         print(f">> Starting the train of the model using the following train set: {args.train_path}")
         train_dataset = GraphDataset(args.train_path, transform=node_feat_transf) #add_zeros
         train_loader = DataLoader(train_dataset, batch_size=bas, shuffle=True)
-    
-        # ----------- Training loop starts here ------------
+
+        # ----------- pre-training loop ------------ #
+        print("\n--- Starting Pre-training of VGAE model ---")
+        for epoch in range(pretrain_epoches):
+            train_loss = pretraining(model,train_loader,optimizer,device,kl_weight_max,epoch, an_ep_kl)
+            train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
+            print(f"PRETRAINING: Epoch {epoch + 1}/{pretrain_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
+        
+
+        print(f"--- Pre-training Completed ---")
+        # -----------   Training loop   ------------ #
         for epoch in range(num_epoches):
-            train_loss = train(model, train_loader, optimizer, device, kl_weight_max, epoch)
+            train_loss = train(model,train_loader,optimizer,device,kl_weight_max,epoch,an_ep_kl)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
@@ -100,10 +111,11 @@ def main(args):
 
     # Save predictions to CSV
     test_dir_name = os.path.dirname(args.test_path).split(os.sep)[-1]
-    output_csv_path = os.path.join(f"testset_{test_dir_name}.csv")
+    #output_csv_path = os.path.join(f"testset_{test_dir_name}.csv")
+    output_csv_path = os.path.join('/kaggle/working/', f"testset_{test_dir_name}.csv")
     output_df = pd.DataFrame({
         "id": test_graph_ids,
-        "Pred": predictions
+        "pred": predictions
     })
     output_df.to_csv(output_csv_path, index=False)
     print(f"Test predictions saved to {output_csv_path}")

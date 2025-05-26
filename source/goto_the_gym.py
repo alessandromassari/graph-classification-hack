@@ -33,12 +33,48 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     recon_loss = F.binary_cross_entropy(all_the_logits,all_the_labels)
 
     return recon_loss
-    
-    
-def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch):
+
+# Pre training procedure - no classifiers here
+def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_kl):
     model.train()
     total_loss = 0.0
-    annealing_epoch = 50
+
+    # compute dynamic KL weight
+    if cur_epoch < annealing_epoch:
+        kl_weight = kl_weight_max * (cur_epoch / annealing_epoch)
+    else:
+        kl_weight = kl_weight_max
+    # DEBUG PRINT  
+    print(f"PRETRAINING: Epoch {cur_epoch + 1}, KL Weight: {kl_weight:.6f}")    
+    
+    for data in td_loader:
+        data = data.to(device)
+        # reset the gradients each batch 
+        optimizer.zero_grad()
+        
+        adj_pred,mu,logvar,class_logits = model(data.x,
+                                                data.edge_index,
+                                                data.batch,
+                                                enable_classifier=False)
+
+        #KL term loss
+        kl_term_loss = kl_loss(mu, logvar)
+        #reconstruction loss 
+        reconstruction_loss = eval_reconstruction_loss(adj_pred,data.edge_index,data.x.size(0),num_neg_samp=1)
+        #total loss
+        loss = kl_weight*kl_term_loss + reconstruction_loss
+        loss.backward()
+        optimizer.step()
+
+        # accumulate total losses
+        total_loss += loss.item() * data_num_graphs #weight per pesare
+
+    return total_loss/len(td_loader)
+    
+# Training procedure
+def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_kl):
+    model.train()
+    total_loss = 0.0
 
     # compute dynamic KL weight
     if cur_epoch < annealing_epoch:
