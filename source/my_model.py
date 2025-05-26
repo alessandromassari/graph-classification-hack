@@ -8,8 +8,8 @@ from torch_geometric.utils import to_dense_adj
 class gen_node_features(object):
     def __init__(self, feat_dim):
         self.feat_dim = feat_dim
-    def __forward__(self, data):
-        num_nodes = data.num_modes hasattr(data, 'num_nodes') and data.num_nodes is not None else data.edge_index.max().item() + 1
+    def __call__(self, data):
+        num_nodes = data.num_modes if hasattr(data, 'num_nodes') and data.num_nodes is not None else data.edge_index.max().item() + 1
         data.x = torch.zeros((num_nodes, self.feat_dim), dtype=torch.float)
         return data
 
