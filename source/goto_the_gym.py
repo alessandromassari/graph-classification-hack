@@ -5,7 +5,6 @@ import torch.nn.functional as F
 from torch_geometric.utils import to_dense_adj, negative_sampling
 from my_model import VGAE_all
 
-
 # our beloved Kullback-Leibler term loss
 def kl_loss(mu, logvar):
     # clip logvar to avoid extreme values 
@@ -55,7 +54,24 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
                                                 data.edge_index,
                                                 data.batch,
                                                 enable_classifier=False)
+        # DEBUG: Stampa le statistiche di mu, logvar, z
+        mu, logvar = model.encoder(data.x, data.edge_index)
+        z = reparametrize(mu, logvar)
+        adj_pred_logits_before_sigmoid = torch.mm(z, z.t()) # Calcola i logits prima della sigmoid
 
+        # Stampa alcune statistiche
+        print(f"  Shape of z: {z.shape}")
+        print(f"  Mean of mu: {mu.mean().item():.4f}, Std of mu: {mu.std().item():.4f}")
+        print(f"  Mean of logvar: {logvar.mean().item():.4f}, Std of logvar: {logvar.std().item():.4f}")
+        print(f"  Mean of z: {z.mean().item():.4f}, Std of z: {z.std().item():.4f}")
+        print(f"  Min of adj_pred_logits: {adj_pred_logits_before_sigmoid.min().item():.4f}, Max of adj_pred_logits: {adj_pred_logits_before_sigmoid.max().item():.4f}")
+
+        adj_pred = model.decoder(z) # Questa applica la sigmoid
+    
+        print(f"  Min of adj_pred (probs): {adj_pred.min().item():.4f}, Max of adj_pred (probs): {adj_pred.max().item():.4f}")
+        print(f"  Mean of adj_pred (probs): {adj_pred.mean().item():.4f}")
+        # ------------- FINE DEBUG PRINT ------------   
+        
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
@@ -88,12 +104,8 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         # reset the gradients each batch 
         optimizer.zero_grad()
         
-        #DEBUG PRINT
-        #print(f"Shape of data.x: {data.x.shape}")
-        #print(f"Shape of data.edge_index: {data.edge_index.shape}")
-        
         adj_pred, mu, logvar, class_logits = model(data.x, data.edge_index, data.batch)
-
+     
         #classification loss
         classification_loss = F.cross_entropy(class_logits, data.y)
         #KL term loss
