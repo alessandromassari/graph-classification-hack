@@ -46,7 +46,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch):
     else:
         kl_weight = kl_weight_max
     # DEBUG PRINT  
-    print(f"Epoch {current_epoch + 1}, KL Weight: {kl_weight:.6f}")    
+    print(f"Epoch {cur_epoch + 1}, KL Weight: {kl_weight:.6f}")    
     
     for data in td_loader:
         data = data.to(device)
