@@ -35,7 +35,7 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     return recon_loss
     
     
-def train(model, td_loader, optimizer, device, kl_weight=0.2):
+def train(model, td_loader, optimizer, device, kl_weight=0.1):
     model.train()
     total_loss = 0.0
 
