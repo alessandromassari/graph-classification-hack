@@ -13,7 +13,7 @@ def kl_loss(mu, logvar):
     return -0.5 * torch.mean(1 + clip_logvar -mu.pow(2) - clip_logvar.exp())
 
 # reconstruction loss function
-def eval_reconstrucation_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
+def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     
     positive_logits = adj_pred[edge_index[0], edge_index[1]]
     positive_labels = torch.ones_like(positive_logits)
@@ -55,7 +55,7 @@ def train(model, td_loader, optimizer, device, kl_weight=0.2):
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        reconstruction_loss = eval_reconstrucation_loss(adj_pred,data.edge_index,data.x.size(0),num_neg_samp=1)
+        reconstruction_loss = eval_reconstruction_loss(adj_pred,data.edge_index,data.x.size(0),num_neg_samp=1)
         #total loss
         loss = classification_loss + kl_weight*kl_term_loss + reconstruction_loss
         loss.backward()
