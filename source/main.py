@@ -17,7 +17,8 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
         for data in data_loader:
             data = data.to(device)
             output = model(data)
-            pred = output.argmax(dim=1)
+            class_logits = output[3]
+            pred = class_logits.argmax(dim=1)
             predictions.extend(pred.cpu().numpy())
             if calculate_accuracy:
                 correct += (pred == data.y).sum().item()
@@ -50,33 +51,37 @@ def main(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     node_feat_transf = gen_node_features(feat_dim = in_dim)
+
+    # checkpoints saving threshold on training loss - if have time implement this on acc or validation
+    model_loss_min = float('inf')
+
+    # TO BE IMPLEMENTED FOR LOGS AT LEAST 10
+    logs_counter = 0
     
     # Prepare test dataset and loader
     test_dataset = GraphDataset(args.test_path, transform=node_feat_transf) #add_zeros
     test_loader = DataLoader(test_dataset, batch_size=bas, shuffle=False)
 
-    
     # If train_path is provided then train on it 
     if args.train_path:
         print(f">> Starting the train of the model using the following train set: {args.train_path}")
         train_dataset = GraphDataset(args.train_path, transform=node_feat_transf) #add_zeros
         train_loader = DataLoader(train_dataset, batch_size=bas, shuffle=True)
     
-        # Training
+        # ----------- Training loop starts here ------------
         for epoch in range(num_epoches):
             train_loss = train(model, train_loader, optimizer, device)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
-        
-        # Save the checkpoint - call external function
-        test_dir_name = os.path.basename(os.path.dirname(args.test_path))
-        # INSERIRE IF BEST ACCURACY OR COUNTER < 5
-        save_checkpoint(model, test_dir_name, epoch)
+        # Save the checkpoint if condition
+        if (epoch < 5) or (train_loss < model_loss_min):
+            model_loss_min = train_loss
+            test_dir_name = os.path.basename(os.path.dirname(args.test_path))
+            save_checkpoint(model, test_dir_name, epoch)
 
         # SAVE LOGS EACH 10 EPOCHS TO BE COMPLETED 
-        #logs/: Log files for each training dataset. Include logs of accuracy and loss recorded every 10 epochs.
-        # usare sempre test_dir_name
+        #logs/: Log files for each training dataset. Include logs of accuracy and loss recorded every 10 epochs. # usare sempre test_dir_name
         
     # Else if train_path NOT provided 
     if not args.train_path:
@@ -84,6 +89,7 @@ def main(args):
         # raise an error if not able to find the checkpoint model
         if not os.path.exists(checkpoint_path):
             raise FileNotFoundError(f"Checkpoint not found! {checkpoint_path}")
+        checkpoint = torch.load(checkpoint_path, map_location=device)
         model.load_state_dict(checkpoint['model_state_dict'])
         print(f">> Loading pre-training model from: {checkpoint_path}")
           
@@ -106,5 +112,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train and evaluate a classification model on graph datasets.")
     parser.add_argument("--train_path", type=str, default=None, help="Path to the training dataset (optional).")
     parser.add_argument("--test_path", type=str, required=True, help="Path to the test dataset.")
+    parser.add_argument("--checkpoint_path", type=str, default=None, help="Path to the checkpoint model (e.g. checkpoints/model_B_epoch_10.pth)")
     args = parser.parse_args()
     main(args)

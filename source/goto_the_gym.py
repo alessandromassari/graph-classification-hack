@@ -2,9 +2,39 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.utils import to_dense_adj
-from my_model import VGAE_all, kl_loss
+from torch_geometric.utils import to_dense_adj, negative_sampling
+from my_model import VGAE_all
 
+
+# our beloved Kullback-Leibler term loss
+def kl_loss(mu, logvar):
+    # clip logvar to avoid extreme values 
+    clip_logvar = torch.clamp(logvar, min=-5.0, max=5.0) 
+    return -0.5 * torch.mean(1 + clip_logvar -mu.pow(2) - clip_logvar.exp())
+
+# reconstruction loss function
+def eval_reconstrucation_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
+    
+    positive_logits = adj_pred[edge_index[0], edge_index[1]]
+    positive_labels = torch.ones_like(positive_logits)
+
+    neg_edge_index = negative_sampling(
+        edge_index,
+        num_nodes = num_nodes,
+        num_neg_samples = edge_index.size(1)*num_neg_samp)
+    # as for positive but for negative edges
+    negative_logits = adj_pred[neg_edge_index[0],neg_edge_index[1]]
+    negative_labels = torch.zeros_like(negative_logits)
+
+    # DEBUG info: use .cat instead of np.concatenate() to keep all on GPU
+    all_the_logits = torch.cat([positive_logits, negative_logits])
+    all_the_labels = torch.cat([positive_labels, negative_labels])
+
+    recon_loss = F.binary_cross_entropy(all_the_logits,all_the_labels)
+
+    return recon_loss
+    
+    
 def train(model, td_loader, optimizer, device, kl_weight=0.2):
     model.train()
     total_loss = 0.0
@@ -20,28 +50,18 @@ def train(model, td_loader, optimizer, device, kl_weight=0.2):
         
         adj_pred, mu, logvar, class_logits = model(data.x, data.edge_index, data.batch)
 
+        #classification loss
         classification_loss = F.cross_entropy(class_logits, data.y)
+        #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
-        
-        # reconstruction loss is a little bit more complex
-        true_adj = to_dense_adj(data.edge_index, batch=data.batch)
-        reconstruction_loss = 0.0
-        first = 0
-        for batch_id in range(true_adj.size(0)):
-            n_nodes = (data.batch == batch_id).sum().item()
-            adj_true_i = true_adj[batch_id, :n_nodes, :n_nodes]
-            adj_pred_i = adj_pred[first:first+n_nodes, first:first+n_nodes]
-            reconstruction_loss += F.binary_cross_entropy(adj_true_i,adj_pred_i)
-            first += n_nodes
-        reconstruction_loss /= true_adj.size(0)
-
+        #reconstruction loss 
+        reconstruction_loss = eval_reconstrucation_loss(adj_pred,edge_index,data.x.size(0),num_neg_samp=1)
         #total loss
         loss = classification_loss + kl_weight*kl_term_loss + reconstruction_loss
         loss.backward()
         optimizer.step()
 
         # accumulate total losses
-        total_loss += loss.item()
+        total_loss += loss.item() #* data_num_graphs # provare weight per pesare
 
     return total_loss/len(td_loader)
-

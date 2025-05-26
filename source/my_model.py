@@ -34,11 +34,6 @@ class VGAE_decoder(nn.Module):
         adj_pred = torch.sigmoid(torch.mm(z, z.t()))
         return adj_pred
 
-# our beloved Kullback-Leibler term
-def kl_loss(mu, logvar):
-    # clip logvar to avoid extreme values 
-    clip_logvar = torch.clamp(logvar, min=-5.0, max=5.0) 
-    return -0.5 * torch.mean(1 + clip_logvar -mu.pow(2) - clip_logvar.exp())
 
 def reparametrize(mu, logvar):
     std = torch.exp(0.5 * logvar)
