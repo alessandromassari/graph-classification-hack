@@ -43,7 +43,7 @@ def main(args):
     out_classes = 6  
     num_epoches: int = 10 # 10
     learning_rate = 0.001
-    bas = 32 #batch size
+    bas = 64 #batch size
     torch.manual_seed(0)
 
     # Initialize the model and choose the optimizer
