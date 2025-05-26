@@ -35,10 +35,19 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     return recon_loss
     
     
-def train(model, td_loader, optimizer, device, kl_weight=0.1):
+def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch):
     model.train()
     total_loss = 0.0
+    annealing_epoch = 50
 
+    # compute dynamic KL weight
+    if cur_epoch < annealing_epoch:
+        kl_weight = kl_weight_max * (cur_epoch / annealing_epoch)
+    else:
+        kl_weight = kl_weight_max
+    # DEBUG PRINT  
+    print(f"Epoch {current_epoch + 1}, KL Weight: {kl_weight:.6f}")    
+    
     for data in td_loader:
         data = data.to(device)
         # reset the gradients each batch 
