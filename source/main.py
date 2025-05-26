@@ -42,7 +42,7 @@ def main(args):
     lat_dim = 8            # 16
     out_classes = 6  
     pretrain_epoches = 20  # previous val: 10
-    num_epoches: int = 20  # previous val: 10
+    num_epoches: int = 40  # previous val: 10
     learning_rate = 0.0005 # previous val: 0.001
     bas = 32 #batch size:  # previous val: 64 
     kl_weight_max = 0.01   # weight for KL loss
