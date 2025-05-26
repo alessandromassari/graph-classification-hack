@@ -16,7 +16,7 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
     with torch.no_grad():
         for data in data_loader:
             data = data.to(device)
-            output = model(data)
+            output = model(data.x, data.edge_index, data.batch)
             class_logits = output[3]
             pred = class_logits.argmax(dim=1)
             predictions.extend(pred.cpu().numpy())
