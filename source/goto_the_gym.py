@@ -14,7 +14,6 @@ def kl_loss(mu, logvar):
 
 # reconstruction loss function
 def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
-    
     positive_logits = adj_pred[edge_index[0], edge_index[1]]
     positive_labels = torch.ones_like(positive_logits)
 
@@ -78,7 +77,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
 
     # compute dynamic KL weight
     if cur_epoch < annealing_epoch:
-        kl_weight = kl_weight_max * (cur_epoch / annealing_epoch)
+        kl_weight = kl_weight_max * (cur_epoch / an_ep_kl)
     else:
         kl_weight = kl_weight_max
     # DEBUG PRINT  
