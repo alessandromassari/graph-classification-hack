@@ -39,7 +39,7 @@ def main(args):
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim = 128
     hid_dim = 64
-    lat_dim = 8            # 16
+    lat_dim = 16           # 16
     out_classes = 6  
     pretrain_epoches = 20  # previous val: 10
     num_epoches: int = 10  # previous val: 10
