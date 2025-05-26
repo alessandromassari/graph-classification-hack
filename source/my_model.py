@@ -57,7 +57,7 @@ class VGAE_all(nn.Module):
     def forward(self, x, edge_index, batch, enable_classifier=True):
         mu, logvar = self.encoder(x, edge_index)
         z = reparametrize(mu, logvar)
-        adj_pred = self.decoder(z)                # check se serve -
+        adj_pred = self.decoder(z)                
 
         # pooling if classifier was enabled: in pre-training we work only with VGAE
         if enable_classifier:
