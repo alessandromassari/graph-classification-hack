@@ -45,8 +45,8 @@ def train(model, td_loader, optimizer, device, kl_weight=0.1):
         optimizer.zero_grad()
         
         #DEBUG PRINT
-        print(f"Shape of data.x: {data.x.shape}")
-        print(f"Shape of data.edge_index: {data.edge_index.shape}")
+        #print(f"Shape of data.x: {data.x.shape}")
+        #print(f"Shape of data.edge_index: {data.edge_index.shape}")
         
         adj_pred, mu, logvar, class_logits = model(data.x, data.edge_index, data.batch)
 
