@@ -30,7 +30,8 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
 def main(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("device:", device)
-
+    print(f"Current GPU: {torch.cuda.get_device_name(0)}")
+    
     # create directories
     create_dirs()
     
