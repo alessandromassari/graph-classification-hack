@@ -12,10 +12,10 @@ def create_dirs():
     project_dir = os.path.dirname(actual_dir)
 
     # create directories 
-    checkpoints_dir = os.path.join(project_dir, 'checkpoints')
-    logs_dir = os.path.join(project_dir, 'logs')
-    os.makedirs(checkpoints_dir, exist_ok= True)
-    os.makedirs(logs_dir, exist_ok= True)
+    checkpoints = os.path.join(project_dir, 'checkpoints')
+    logs = os.path.join(project_dir, 'logs')
+    os.makedirs(checkpoints, exist_ok= True)
+    os.makedirs(logs, exist_ok= True)
 
     print(f"Logs and checkpoints directories created.")
 
