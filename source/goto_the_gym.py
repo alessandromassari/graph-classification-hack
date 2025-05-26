@@ -67,7 +67,7 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         optimizer.step()
 
         # accumulate total losses
-        total_loss += loss.item() * data_num_graphs #weight per pesare
+        total_loss += loss.item() * data.num_graphs if hasattr(data, 'num_graphs') else loss.item()#weight per pesare
 
     return total_loss/len(td_loader)
     
@@ -107,6 +107,6 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         optimizer.step()
 
         # accumulate total losses
-        total_loss += loss.item() #* data_num_graphs # provare weight per pesare
+        total_loss += loss.item() * data.num_graphs if hasattr(data, 'num_graphs') else loss.item() # provare weight per pesare
 
     return total_loss/len(td_loader)
