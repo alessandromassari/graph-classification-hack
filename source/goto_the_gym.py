@@ -53,14 +53,7 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         adj_pred,mu,logvar,class_logits = model(data.x,
                                                 data.edge_index,
                                                 data.batch,
-                                                enable_classifier=False)
-
-        print(f"  Mean of mu: {mu.mean().item():.4f}, Std of mu: {mu.std().item():.4f}")
-        print(f"  Mean of logvar: {logvar.mean().item():.4f}, Std of logvar: {logvar.std().item():.4f}")
-    
-        print(f"  Min of adj_pred (probs): {adj_pred.min().item():.4f}, Max of adj_pred (probs): {adj_pred.max().item():.4f}")
-        print(f"  Mean of adj_pred (probs): {adj_pred.mean().item():.4f}")
-        # ------------- FINE DEBUG PRINT ------------   
+                                                enable_classifier=False) 
         
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
