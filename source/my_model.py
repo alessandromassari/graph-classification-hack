@@ -5,7 +5,7 @@ from torch_geometric.nn import GCNConv, global_mean_pool
 from torch_geometric.utils import to_dense_adj
 
 # node features gen class - mi piaceva metterla qui anche se è più "data preparation"
-class gen_node_features():
+class gen_node_features(object):
     def __init__(self, feat_dim):
         self.feat_dim = feat_dim
     def __forward__(self, data):
