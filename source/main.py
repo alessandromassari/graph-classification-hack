@@ -37,7 +37,7 @@ def main(args):
     create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
-    in_dim = 128
+    in_dim  = 32           # previous val: 128 i want a faster model
     hid_dim = 64
     lat_dim = 16           # 16
     out_classes = 6  
