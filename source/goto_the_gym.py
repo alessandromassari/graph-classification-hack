@@ -55,7 +55,7 @@ def train(model, td_loader, optimizer, device, kl_weight=0.2):
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        reconstruction_loss = eval_reconstrucation_loss(adj_pred,edge_index,data.x.size(0),num_neg_samp=1)
+        reconstruction_loss = eval_reconstrucation_loss(adj_pred,data.edge_index,data.x.size(0),num_neg_samp=1)
         #total loss
         loss = classification_loss + kl_weight*kl_term_loss + reconstruction_loss
         loss.backward()
