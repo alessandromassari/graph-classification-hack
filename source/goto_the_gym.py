@@ -40,8 +40,8 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
     total_loss = 0.0
 
     # compute dynamic KL weight
-    if cur_epoch < annealing_epoch:
-        kl_weight = kl_weight_max * (cur_epoch / annealing_epoch)
+    if cur_epoch < an_ep_kl:
+        kl_weight = kl_weight_max * (cur_epoch / an_ep_kl)
     else:
         kl_weight = kl_weight_max
     # DEBUG PRINT  
