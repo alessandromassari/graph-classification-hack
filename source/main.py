@@ -6,7 +6,7 @@ from loadData import GraphDataset
 import pandas as pd 
 from goto_the_gym import train
 from utilities import create_dirs, save_checkpoint, add_zeros
-from my_model import VGAE_all
+from my_model import VGAE_all, gen_node_features
 
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
@@ -27,7 +27,6 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
         return accuracy, predictions
     return predictions
 
-
 def main(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("device:", device)
@@ -36,25 +35,31 @@ def main(args):
     create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
-    in_dim = 300 
+    in_dim = 128
     hid_dim = 64
     lat_dim = 8  #16
     out_classes = 6  
-    num_epoches: int = 100 # 100
-    
+    num_epoches: int = 10 # 10
+    learning_rate = 0.001
+    bas = 32 #batch size
+    torch.manual_seed(0)
+
     # Initialize the model and choose the optimizer
     model = VGAE_all(in_dim, hid_dim, lat_dim, out_classes).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
+    node_feat_transf = gen_node_features(feat_dim = in_dim)
+    
     # Prepare test dataset and loader
-    test_dataset = GraphDataset(args.test_path, transform=add_zeros)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    test_dataset = GraphDataset(args.test_path, transform=node_feat_transf) #add_zeros
+    test_loader = DataLoader(test_dataset, batch_size=bas, shuffle=False)
 
+    
     # If train_path is provided then train on it 
     if args.train_path:
         print(f">> Starting the train of the model using the following train set: {args.train_path}")
-        train_dataset = GraphDataset(args.train_path, transform=add_zeros)
-        train_loader = DataLoader(train_dataset, batch_size=24, shuffle=True)
+        train_dataset = GraphDataset(args.train_path, transform=node_feat_transf) #add_zeros
+        train_loader = DataLoader(train_dataset, batch_size=bas, shuffle=True)
     
         # Training
         for epoch in range(num_epoches):
