@@ -41,9 +41,10 @@ def main(args):
     hid_dim = 64
     lat_dim = 8  #16
     out_classes = 6  
-    num_epoches: int = 10 # 10
-    learning_rate = 0.001
-    bas = 64 #batch size
+    num_epoches: int = 10 #previous val: 10
+    learning_rate = 0.0005 #previous val: 0.001
+    bas = 32 #batch size: #previous val: 64 
+    kl_weight_max = 0.01 # weight for KL loss
     torch.manual_seed(0)
 
     # Initialize the model and choose the optimizer
@@ -70,7 +71,7 @@ def main(args):
     
         # ----------- Training loop starts here ------------
         for epoch in range(num_epoches):
-            train_loss = train(model, train_loader, optimizer, device)
+            train_loss = train(model, train_loader, optimizer, device, kl_weight_max, epoch)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
