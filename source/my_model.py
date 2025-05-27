@@ -98,8 +98,11 @@ class VGAE_all(nn.Module):
             
         mu, logvar = self.encoder(x, edge_index, edge_attr)
         z = reparametrize(mu, logvar)
-        adj_pred = self.decoder(z) if z is not None else None              
-
+        adj_pred = self.decoder(z) if z is not None else None 
+        
+        #DEBUG PRINT 
+        print(f"DEBUG: adj_pred stats (before BCE): mean={adj_pred.mean().item():.4f}, std={adj_pred.std().item():.4f}, min={adj_pred.min().item():.4f}, max={adj_pred.max().item():.4f}, has_nan={torch.isnan(adj_pred).any()}, has_inf={torch.isinf(adj_pred).any()}")
+       
         # pooling if classifier was enabled: in pre-training we work only with VGAE
         if enable_classifier:
             if z is None:
