@@ -38,7 +38,7 @@ def main(args):
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim  = 32           # previous val: 128 i want a faster model
-    hid_dim = 64
+    hid_dim = 128
     lat_dim = 8            # 16
     out_classes = 6  
     pretrain_epoches = 20  # previous val: 10
@@ -74,7 +74,7 @@ def main(args):
         # ----------- pre-training loop ------------ #
         print("\n--- Starting Pre-training of VGAE model ---")
         for epoch in range(pretrain_epoches):
-            train_loss = pretraining(model,train_loader,optimizer,device,kl_weight_max,epoch, an_ep_kl)
+            train_loss = pretraining(model,train_loader, optimizer, device,kl_weight_max, epoch, an_ep_kl)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"PRETRAINING: Epoch {epoch + 1}/{pretrain_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
         
@@ -82,7 +82,7 @@ def main(args):
         print(f"--- Pre-training Completed ---")
         # -----------   Training loop   ------------ #
         for epoch in range(num_epoches):
-            train_loss = train(model,train_loader,optimizer,device,kl_weight_max,epoch,an_ep_kl)
+            train_loss = train(model,train_loader, optimizer, device, kl_weight_max, epoch,an_ep_kl)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
