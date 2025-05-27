@@ -103,7 +103,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
             target_y = data.y.squeeze(1)
         else:
             target_y = data.y
-        classification_loss = F.cross_entropy(class_logits, target.y) 
+        classification_loss = F.cross_entropy(class_logits, target_y) 
         
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
@@ -121,6 +121,6 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         preds = torch.argmax(class_logits, dim=1)
         total_guessed_pred += (preds == target_y).sum().item()
         total_worked_graphs += data.num_graphs 
-        ep_accuracy = total_guessed_pred / total_worked_graph
+        ep_accuracy = total_guessed_pred / total_worked_graphs
         
     return total_loss/len(td_loader), ep_accuracy
