@@ -80,7 +80,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
     model.train()
     total_loss = 0.0
     total_guessed_pred = 0
-    total_worked_graph = 0
+    total_worked_graphs = 0
     
     # compute dynamic KL weight
     if cur_epoch < an_ep_kl:
