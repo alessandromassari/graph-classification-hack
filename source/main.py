@@ -46,7 +46,7 @@ def main(args):
     hid_dim_classifier=64
     
     pretrain_epoches = 20  # previous val: 10
-    num_epoches: int = 40  # previous val: 10
+    num_epoches      = 40  # previous val: 10
     learning_rate = 0.0005 # previous val: 0.001
     bas = 32 #batch size:  # previous val: 64 
     kl_weight_max = 0.005  # previous val: 0.01
@@ -81,9 +81,8 @@ def main(args):
             train_loss = pretraining(model,train_loader, optimizer, device,kl_weight_max, epoch, an_ep_kl)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"PRETRAINING: Epoch {epoch + 1}/{pretrain_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
-        
-
         print(f"--- Pre-training Completed ---")
+        
         # -----------   Training loop   ------------ #
         for epoch in range(num_epoches):
             train_loss = train(model,train_loader, optimizer, device, kl_weight_max, epoch,an_ep_kl)
