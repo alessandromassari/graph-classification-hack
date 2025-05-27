@@ -40,15 +40,15 @@ class VGAE_encoder(nn.Module):   #- DA FARE CHECK
         nn_mu_edge_maps = nn.Sequential(
             nn.Linear(edge_feat_dim, hid_edge_nn_dim),
             nn.ReLU(),
-            nn.Linear(hid_edge_nn_dim, in_dim*lat_dim) 
+            nn.Linear(hid_edge_nn_dim, hid_dim*lat_dim) 
         )
-        self.conv_mu = NNConv(hid_dim,lat_dim, nn_mu_edge_maps, aggr='mean')
+        self.conv_mu = NNConv(hid_dim,lat_dim, nn_mu_edge_maps, aggr='sum') # test aggr='mean'
         nn_logvar_edge_maps = nn.Sequential(
             nn.Linear(edge_feat_dim, hid_edge_nn_dim),
             nn.ReLU(),
-            nn.Linear(hid_edge_nn_dim, in_dim*lat_dim)
+            nn.Linear(hid_edge_nn_dim, hid_dim*lat_dim)
         )
-        self.conv_logvar = NNConv(hid_dim,lat_dim,nn_logvar_edge_maps, aggr='mean')
+        self.conv_logvar = NNConv(hid_dim,lat_dim,nn_logvar_edge_maps, aggr='sum') # test aggr='mean'
         self.dropout = nn.Dropout(0.2) # 20% dropout
         
     def forward(self, x, edge_index, edge_attr):
