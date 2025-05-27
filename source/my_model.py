@@ -10,12 +10,14 @@ class gen_node_features(object):
         self.feat_dim = feat_dim
     def __call__(self, data):
         # generate node features if not exist
-        if not hassattr(data, 'x'):
+        if not hasattr(data, 'x'):
             if hasattr(data, 'edge_index'):
                 num_nodes = data.num_nodes if hasattr(data, 'num_nodes') and data.num_nodes is not None else data.edge_index.max().item() + 1
                 data.x = torch.zeros((num_nodes, self.feat_dim), dtype=torch.float)
+                #data.x = torch.randn((num_nodes, self.feat_dim), dtype=torch.float) ALTERNATIVA
             else:
                 pass
+        data.x = torch.nan_to_num(data.x, nan=0.0) # avoid NaN values in every case
         return data
 
 # Encoder class
@@ -72,7 +74,7 @@ class VGAE_all(nn.Module):
     def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=32, 
                  out_classes, hid_dim_classifier=64):
         super().__init__()
-        self.encoder = VGAE_encoder(n_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim)
+        self.encoder = VGAE_encoder(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim)
         self.decoder = VGAE_decoder()
         self.classifier = nn.Sequential(
             nn.Linear(lat_dim, hid_dim_classifier),
@@ -88,7 +90,7 @@ class VGAE_all(nn.Module):
         
         # check on x and edge_attr != None
         if (x is None) or (edge_attr is None):
-            raise Error("None values for features data.x or for data.edge_attr!")
+            raise ValueError("None values for features data.x or for data.edge_attr!")
             
         mu, logvar = self.encoder(x, edge_index, edge_attr)
         z = reparametrize(mu, logvar)
@@ -97,7 +99,7 @@ class VGAE_all(nn.Module):
         # pooling if classifier was enabled: in pre-training we work only with VGAE
         if enable_classifier:
             if z is None:
-                raise Error("Latent node embeddings 'z' are None! Unable to use the classifier.")
+                raise ValueError("Latent node embeddings 'z' are None! Unable to use the classifier.")
             graph_embedding = global_mean_pool(z, batch)
             class_logits = self.classifier(graph_embedding)
         # else if classifier is NOT enabled then class_logits = None
