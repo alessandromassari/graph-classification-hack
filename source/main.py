@@ -106,21 +106,21 @@ def main(args):
             # validation valutation every 5 epoches
             vaL_loss = 0.0
             val_accuracy = 0.0
+            # evaluate on validation set every 5 epoches
             if (epoch+1) % 5 == 0 or epoch == num_epoches - 1:
                 val_accuray, val_loss = evaluate(val_loader,model,device,calculate_accuracy=True)
                 print(f"VALIDATION: Epoch {epoch + 1}/{num_epoches}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
+                test_dir_name = os.path.basename(os.path.dirname(args.test_path))
+                save_checkpoint(model, test_dir_name, epoch, val_accuracy) 
+                print(f"Checkpoint saved for epoch {epoch + 1} with validation accuracy: {val_accuracy:.4f}")
+                
             print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
-
-        if ((epoch+1) % 5 == 0 or epoch == num_epoches -1) and (val_accuracy > best_val_accuracy):
-            best_val_accuracy = val_accuracy
-            test_dir_name = os.path.basename(os.path.dirname(args.test_path))
-            save_checkpoint(model, test_dir_name, epoch, best_val_accuracy) 
-            print(f"Checkpoint saved for epoch {epoch + 1} with improved validation accuracy: {best_val_accuracy:.4f}")
-        
-        if (epoch < 5) or (train_loss < model_loss_min):
-            model_loss_min = train_loss
-            test_dir_name = os.path.basename(os.path.dirname(args.test_path))
-            save_checkpoint(model, test_dir_name, epoch)
+            
+       
+      #  if (epoch < 5) or (train_loss < model_loss_min):
+    #       model_loss_min = train_loss
+    #       test_dir_name = os.path.basename(os.path.dirname(args.test_path))
+     #      save_checkpoint(model, test_dir_name, epoch)
 
         # SAVE LOGS EACH 10 EPOCHS TO BE COMPLETED 
         #logs/: Log files for each training dataset. Include logs of accuracy and loss recorded every 10 epochs. # usare sempre test_dir_name
