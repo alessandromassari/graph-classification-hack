@@ -69,6 +69,7 @@ class VGAE_decoder(nn.Module):
         return adj_pred
 
 def reparametrize(mu, logvar):
+    logvar = torch.clamp(logvar, min=-5.0, max=5.0) # after debug print
     std = torch.exp(0.5 * logvar)
     eps = torch.randn_like(std)
     return mu + eps*std
