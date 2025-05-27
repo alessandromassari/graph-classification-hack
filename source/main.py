@@ -49,8 +49,9 @@ def main(args):
     an_ep_kl = 20
     torch.manual_seed(0)
 
+
     # Initialize the model and choose the optimizer
-    model = VGAE_all(in_dim, hid_dim, lat_dim, edge_feat_dim=7, hid_edge_nn_dim, out_classes).to(device)
+    model = VGAE_all(in_dim, hid_dim, lat_dim, edge_feat_dim=7, hid_edge_nn_dim=32, out_classes, hid_dim_classifier=64).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     node_feat_transf = gen_node_features(feat_dim = in_dim)
