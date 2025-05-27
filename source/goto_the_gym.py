@@ -13,6 +13,11 @@ def kl_loss(mu, logvar):
 
 # reconstruction loss function
 def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
+
+    # DEBUG PRINT
+    print(f"DEBUG: Entering eval_reconstruction_loss with adj_pred shape: {adj_pred.shape}, num_nodes: {num_nodes}")
+    print(f"DEBUG: adj_pred values before clamping: min={adj_pred.min().item():.4f}, max={adj_pred.max().item():.4f}")
+    
     positive_logits = adj_pred[edge_index[0], edge_index[1]]
     positive_labels = torch.ones_like(positive_logits)
 
