@@ -7,6 +7,7 @@ import pandas as pd
 from goto_the_gym import pretraining, train
 from utilities import create_dirs, save_checkpoint, add_zeros
 from my_model import VGAE_all, gen_node_features
+from sklearn.model_selection import train_test_split
 
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
@@ -24,7 +25,9 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
                 correct += (pred == data.y).sum().item()
                 total += data.y.size(0)
     if calculate_accuracy:
-        accuracy = correct / total
+        if total > 0:
+            accuracy = correct / total 
+        else: accuracy = 0.0
         return accuracy, predictions
     return predictions
 
@@ -52,6 +55,8 @@ def main(args):
     kl_weight_max = 0.005  # previous val: 0.01
     an_ep_kl = 20
     torch.manual_seed(0)
+
+    # early stopping parameters (MAYBE IN THE FUTURE)
     
     # Initialize the model and choose the optimizer
     model = VGAE_all(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim, out_classes, hid_dim_classifier).to(device)
@@ -66,15 +71,25 @@ def main(args):
     logs_counter = 0
     
     # Prepare test dataset and loader
-    test_dataset = GraphDataset(args.test_path, transform=node_feat_transf) #add_zeros
+    test_dataset = GraphDataset(args.test_path, transform=node_feat_transf)
     test_loader = DataLoader(test_dataset, batch_size=bas, shuffle=False)
 
-    # If train_path is provided then train on it 
+     # If train_path is provided then train on it
     if args.train_path:
         print(f">> Starting the train of the model using the following train set: {args.train_path}")
-        train_dataset = GraphDataset(args.train_path, transform=node_feat_transf) #add_zeros
+        all_train_dataset = GraphDataset(args.train_path, transform=node_feat_transf) #add_zeros
+        all_train_index = list(range(len(all_train_dataset)))
+        val_size = 0.2
+        random_state = 46
+        train_index, val_index = train_test_split(all_train_index,val_size,random_state)
+        
+        # split the training set in training and validation set
+        train_dataset = torch.utils.data.Subset(all_train_dataset, train_index)
+        val_dataset = torch.utils.data.Subset(all_train_dataset, val_index)
+        
         train_loader = DataLoader(train_dataset, batch_size=bas, shuffle=True)
-
+        val_loader = DataLoader(val_dataset, batch_size=bas, shuffle=False)
+        
         # ----------- pre-training loop ------------ #
         print("\n--- Starting Pre-training of VGAE model ---")
         for epoch in range(pretrain_epoches):
@@ -87,9 +102,21 @@ def main(args):
         for epoch in range(num_epoches):
             train_loss = train(model,train_loader, optimizer, device, kl_weight_max, epoch,an_ep_kl)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
-            print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
-        # Save the checkpoint if condition
+            # validation valutation every 5 epoches
+            vaL_loss = 0.0
+            val_accuracy = 0.0
+            if (epoch+1) % 5 == 0 or epoch == num_epoches - 1:
+                val_accuray, val_loss = evaluate(val_loader,model,device,calculate_accuracy=True)
+                print(f"VALIDATION: Epoch {epoch + 1}/{num_epoches}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
+            print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
+
+        if ((epoch+1) % 5 == 0 or epoch == num_epoches -1) and (val_accuracy > best_val_accuracy):
+            best_val_accuracy = val_accuracy
+            test_dir_name = os.path.basename(os.path.dirname(args.test_path))
+            save_checkpoint(model, test_dir_name, epoch, best_val_accuracy) 
+            print(f"Checkpoint saved for epoch {epoch + 1} with improved validation accuracy: {best_val_accuracy:.4f}")
+        
         if (epoch < 5) or (train_loss < model_loss_min):
             model_loss_min = train_loss
             test_dir_name = os.path.basename(os.path.dirname(args.test_path))
