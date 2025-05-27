@@ -88,7 +88,7 @@ def main(args):
         for epoch in range(num_epoches):
             train_loss = train(model,train_loader, optimizer, device, kl_weight_max, epoch,an_ep_kl)
             train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
-            print(f"Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
+            print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
 
         # Save the checkpoint if condition
         if (epoch < 5) or (train_loss < model_loss_min):
