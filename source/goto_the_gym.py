@@ -95,7 +95,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         # reset the gradients each batch 
         optimizer.zero_grad()
         
-        adj_pred, mu, logvar, class_logits = model(data, enable_classifier=True)
+        adj_pred, mu, logvar, class_logits, z = model(data, enable_classifier=True)
 
         # just a check
         if adj_pred is None or mu is None or logvar is None:
