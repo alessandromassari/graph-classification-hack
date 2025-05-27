@@ -126,6 +126,6 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         preds = torch.argmax(class_logits, dim=1)
         total_guessed_pred += (preds == target_y).sum().item()
         total_worked_graphs += data.num_graphs 
-        ep_accuracy = total_guessed_pred / total_worked_graphs
+        ep_accuracy = total_guessed_pred / total_worked_graphs # NOT USED
         
-    return total_loss/len(td_loader), ep_accuracy
+    return total_loss/len(td_loader)
