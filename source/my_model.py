@@ -13,8 +13,8 @@ class gen_node_features(object):
         if not hasattr(data, 'x'):
             if hasattr(data, 'edge_index'):
                 num_nodes = data.num_nodes if hasattr(data, 'num_nodes') and data.num_nodes is not None else data.edge_index.max().item() + 1
-                data.x = torch.zeros((num_nodes, self.feat_dim), dtype=torch.float)
-                #data.x = torch.randn((num_nodes, self.feat_dim), dtype=torch.float) ALTERNATIVA
+                #data.x = torch.zeros((num_nodes, self.feat_dim), dtype=torch.float) #ALTERNATIVA
+                data.x = torch.randn((num_nodes, self.feat_dim), dtype=torch.float) 
             else:
                 pass
         data.x = torch.nan_to_num(data.x, nan=0.0) # avoid NaN values in every case
