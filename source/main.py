@@ -40,7 +40,11 @@ def main(args):
     in_dim  = 32           # previous val: 128 i want a faster model
     hid_dim = 128
     lat_dim = 8            # 16
-    out_classes = 6  
+    out_classes = 6
+    edge_feat_dim=7
+    hid_edge_nn_dim=32
+    hid_dim_classifier=64
+    
     pretrain_epoches = 20  # previous val: 10
     num_epoches: int = 40  # previous val: 10
     learning_rate = 0.0005 # previous val: 0.001
@@ -48,10 +52,9 @@ def main(args):
     kl_weight_max = 0.01   # weight for KL loss
     an_ep_kl = 20
     torch.manual_seed(0)
-
-
+    
     # Initialize the model and choose the optimizer
-    model = VGAE_all(in_dim, hid_dim, lat_dim, edge_feat_dim=7, hid_edge_nn_dim=32, out_classes, hid_dim_classifier=64).to(device)
+    model = VGAE_all(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim, out_classes, hid_dim_classifier).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
     node_feat_transf = gen_node_features(feat_dim = in_dim)
