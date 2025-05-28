@@ -14,6 +14,8 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
     correct = 0
     total = 0
     predictions = []
+    total_loss = 0.0
+    
     with torch.no_grad():
         for data in data_loader:
             data = data.to(device)
@@ -24,11 +26,15 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
             if calculate_accuracy:
                 correct += (pred == data.y).sum().item()
                 total += data.y.size(0)
+                classification_loss = F.cross_entropy(class_logits, data.y)
+                total_loss += classification_loss
+                
     if calculate_accuracy:
         if total > 0:
             accuracy = correct / total 
+            avg_loss = total_loss / total 
         else: accuracy = 0.0
-        return accuracy, predictions
+        return accuracy, avg_loss, predictions
     return predictions
 
 def main(args):
@@ -92,14 +98,14 @@ def main(args):
         print("\n--- Starting Pre-training of VGAE model ---")
         for epoch in range(pretrain_epoches):
             train_loss = pretraining(model,train_loader, optimizer, device,kl_weight_max, epoch, an_ep_kl)
-            train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
+            train_accuracy, _, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"PRETRAINING: Epoch {epoch + 1}/{pretrain_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
         print(f"--- Pre-training Completed ---")
         
         # -----------   Training loop   ------------ #
         for epoch in range(num_epoches):
             train_loss = train(model,train_loader, optimizer, device, kl_weight_max, epoch,an_ep_kl)
-            train_accuracy, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
+            train_accuracy, _, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
 
             # validation valutation every 5 epoches
             vaL_loss = 0.0
