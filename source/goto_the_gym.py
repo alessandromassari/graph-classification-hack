@@ -5,6 +5,9 @@ import torch.nn.functional as F
 from torch_geometric.utils import to_dense_adj, negative_sampling
 from my_model import VGAE_all
 
+# reconstruction loss weight - DA SPOSTARE DA QUI
+recon_weight = 0.8
+
 # our beloved Kullback-Leibler term loss
 def kl_loss(mu, logvar):
     # clip logvar to avoid extreme values 
@@ -115,7 +118,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         #reconstruction loss 
         reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
         #total loss
-        loss = classification_loss + kl_weight*kl_term_loss + reconstruction_loss
+        loss = classification_loss + kl_weight*kl_term_loss + recon_weight*reconstruction_loss
         loss.backward()
         optimizer.step()
 
