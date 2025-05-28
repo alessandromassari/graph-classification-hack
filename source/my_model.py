@@ -74,7 +74,7 @@ class VGAE_decoder(nn.Module):
         super().__init__()
         
     def forward(self, z, edge_index):
-        srx, dst = edge_index
+        src, dst = edge_index
         score = (z[src] * z[dst]).sum(dim=-1)
         return torch.sigmoid(score)
         
