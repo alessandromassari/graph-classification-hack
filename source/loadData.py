@@ -45,7 +45,7 @@ def dictToGraphObject(graph_dict):
     num_nodes = graph_dict["num_nodes"]
     y = torch.tensor(graph_dict["y"][0], dtype=torch.long) if graph_dict["y"] is not None else None
     
-    temp_data = Data(edge_index=edge_index, edge_attr=edge_attr, num_nodes=num_nodes, y=y)
+    data = Data(edge_index=edge_index, edge_attr=edge_attr, num_nodes=num_nodes, y=y)
     # Feature 1: degree
     node_deg = degree(data.edge_index[0], num_nodes=num_nodes, dtype=torch.float).view(-1,1)
 
