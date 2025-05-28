@@ -36,7 +36,7 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     return recon_loss
 
 # a new loss: huber loss instead of reconstruction loss
-def reconstruction_huber_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
+def reconstruction_huber_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1, beta=1.0):
     positive_logits = adj_pred[edge_index[0], edge_index[1]]
     positive_labels = torch.ones_like(positive_logits)
 
