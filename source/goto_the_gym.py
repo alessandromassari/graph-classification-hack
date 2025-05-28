@@ -17,10 +17,6 @@ def kl_loss(mu, logvar):
 # reconstruction loss function
 def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
 
-    # DEBUG PRINT
-    #print(f"DEBUG: Entering eval_reconstruction_loss with adj_pred shape: {adj_pred.shape}, num_nodes: {num_nodes}")
-    #print(f"DEBUG: adj_pred values before clamping: min={adj_pred.min().item():.4f}, max={adj_pred.max().item():.4f}")
-    
     positive_logits = adj_pred[edge_index[0], edge_index[1]]
     positive_labels = torch.ones_like(positive_logits)
 
@@ -49,7 +45,7 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
     else:
         kl_weight = kl_weight_max
     # DEBUG PRINT  
-    print(f"PRETRAINING: Epoch {cur_epoch + 1}, KL Weight: {kl_weight:.6f}")    
+    #print(f"PRETRAINING: Epoch {cur_epoch + 1}, KL Weight: {kl_weight:.6f}")    
     
     for data in td_loader:
         data = data.to(device)
@@ -76,6 +72,8 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         # accumulate total losses
         total_loss += loss.item() #* data.num_graphs #weight per pesare
 
+    #DEBUG PRINT - KL and recon losses (KL should not to be so closer to zero)
+    print(f"PRETRAINING: Epoch {cur_epoch + 1}, KL Loss: {kl_term_loss:.4f}, Recon Loss: {reconstruction_loss:.4f}")
     return total_loss/len(td_loader)
     
 # Training procedure - classifier is in!
