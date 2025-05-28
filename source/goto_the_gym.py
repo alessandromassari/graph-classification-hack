@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.utils import to_dense_adj, negative_sampling
 from my_model import VGAE_all
+from torch.nn import SmoothL1Loss
 
 # reconstruction loss weight - DA SPOSTARE DA QUI
 recon_weight = 0.5 # previous value: 0.8
@@ -34,6 +35,25 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     recon_loss = F.binary_cross_entropy(all_the_logits,all_the_labels)
     return recon_loss
 
+# a new loss: huber loss instead of reconstruction loss
+def reconstruction_huber_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
+    positive_logits = adj_pred[edge_index[0], edge_index[1]]
+    positive_labels = torch.ones_like(positive_logits)
+
+    neg_edge_index = negative_sampling(
+        edge_index,
+        num_nodes = num_nodes,
+        num_neg_samples = edge_index.size(1)*num_neg_samp)
+    # as for positive but for negative edges
+    negative_logits = adj_pred[neg_edge_index[0],neg_edge_index[1]]
+    negative_labels = torch.zeros_like(negative_logits)
+
+    all_the_logits = torch.cat([positive_logits, negative_logits])
+    all_the_labels = torch.cat([positive_labels, negative_labels])
+    huber = SmoothL1Loss(beta=beta, reduction='mean')
+    
+    return huber(all_the_logits, all_the_labels)
+    
 # Pre training procedure - no classifiers here
 def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_kl):
     model.train()
@@ -63,7 +83,9 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        reconstruction_loss = eval_reconstruction_loss_huber(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1, beta=1.0)
+
         #total pretraining loss
         loss = kl_weight*kl_term_loss + reconstruction_loss
         loss.backward()
@@ -114,7 +136,9 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         #KL term loss
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        reconstruction_loss = eval_reconstruction_loss_huber(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1, beta=1.0)
+
         #total loss
         loss = classification_loss + kl_weight*kl_term_loss + recon_weight*reconstruction_loss
         loss.backward()
