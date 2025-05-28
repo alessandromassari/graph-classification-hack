@@ -20,6 +20,6 @@ def create_dirs():
 def save_checkpoint(model, test_dir_name: str, ep: int, val_accuracy=None):
             filename = f"checkpoints/model_{test_dir_name}_epoch_{ep}.pth"
             torch.save({'model_state_dict': model.state_dict(),
-                        'epoch': epoch, 
+                        'epoch': ep, 
                         'val_accuracy': val_accuracy}, filename)
             print(f" >> Checkpoint saved to: {filename}")
