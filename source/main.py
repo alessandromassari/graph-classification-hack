@@ -118,7 +118,7 @@ def main(args):
                 val_accuracy, val_loss, _ = evaluate(val_loader,model,device,calculate_accuracy=True)
                 print(f"VALIDATION: Epoch {epoch + 1}/{num_epoches}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
                 test_dir_name = os.path.basename(os.path.dirname(args.test_path))
-                save_checkpoint(model, test_dir_name, epoch) 
+                save_checkpoint(model, test_dir_name, epoch, val_accuracy) 
                 print(f"Checkpoint saved for epoch {epoch + 1} with validation accuracy: {val_accuracy:.4f}")
                 
             print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
