@@ -12,7 +12,7 @@ from torch_geometric.loader import DataLoader
 # dimension of node_features
 node_feat_max_size = 4
 
-class GraphDataset(Dataset)):
+class GraphDataset(Dataset):
     def __init__(self, filename, transform=None, pre_transform=None):
         self.raw = filename
         self.graphs = self.loadGraphs(self.raw)
