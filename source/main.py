@@ -69,7 +69,7 @@ def main(args):
     
     # Initialize the model and choose the optimizer
     model = VGAE_all(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim, out_classes, hid_dim_classifier).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=1e-4)
 
     node_feat_transf = gen_node_features(feat_dim = in_dim)
 
