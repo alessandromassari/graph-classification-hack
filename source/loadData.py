@@ -13,7 +13,7 @@ from torch_geometric.utils import from_networkx
 from torch_geometric.utils import to_networkx, degree
 
 # dimension of node_features
-node_feat_max_size = 4
+node_feat_size = 4
 
 class GraphDataset(Dataset):
     def __init__(self, filename, transform=None, pre_transform=None):
