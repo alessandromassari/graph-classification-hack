@@ -6,7 +6,7 @@ from torch_geometric.utils import to_dense_adj, negative_sampling
 from my_model import VGAE_all
 
 # reconstruction loss weight - DA SPOSTARE DA QUI
-recon_weight = 0.8
+recon_weight = 0.5 # previous value: 0.8
 
 # our beloved Kullback-Leibler term loss
 def kl_loss(mu, logvar):
