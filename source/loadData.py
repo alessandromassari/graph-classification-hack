@@ -6,8 +6,11 @@ import json
 import torch
 from torch_geometric.data import Dataset, Data
 import os
+import networkx as nx
 from tqdm import tqdm 
 from torch_geometric.loader import DataLoader
+from torch_geometric.utils import from_networkx
+from torch_geometric.utils import to_networkx, degree
 
 # dimension of node_features
 node_feat_max_size = 4
