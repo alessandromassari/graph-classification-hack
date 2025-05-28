@@ -50,11 +50,11 @@ def main(args):
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim  = 4                 # 4 node_feature don't modify - to be solved
-    hid_dim = 256               # previous val: 128
+    hid_dim = 128               # previous val: 128
     lat_dim = 32                # previous val: 8 - 16
     out_classes = 6
     edge_feat_dim = 7
-    hid_edge_nn_dim = 128        # previous val: 32 - 64
+    hid_edge_nn_dim = 128       # previous val: 32 - 64
     hid_dim_classifier = 64     # previous val: 64
     
     pretrain_epoches = 50      # previous val: 10 - 20
