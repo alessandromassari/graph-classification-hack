@@ -60,8 +60,8 @@ def main(args):
     pretrain_epoches = 50      # previous val: 10 - 20
     num_epoches      = 80      # previous val: 10 - 20 - 40
     learning_rate = 0.0005     # previous val: 0.001
-    bas = 32 #batch size:      # previous val: 64 
-    kl_weight_max = 0.001       # previous val: 0.01 - 0.005
+    bas = 16 #batch size:      # previous val: 32 - 64
+    kl_weight_max = 0.005      # previous val: 0.01 - 0.005
     an_ep_kl = 20
     torch.manual_seed(0)
 
