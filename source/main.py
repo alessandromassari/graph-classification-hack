@@ -113,7 +113,7 @@ def main(args):
             val_accuracy = 0.0
             # evaluate on validation set every 5 epoches
             if (epoch+1) % 5 == 0 or epoch == num_epoches - 1:
-                val_accuray, val_loss = evaluate(val_loader,model,device,calculate_accuracy=True)
+                val_accuray, val_loss, _ = evaluate(val_loader,model,device,calculate_accuracy=True)
                 print(f"VALIDATION: Epoch {epoch + 1}/{num_epoches}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
                 test_dir_name = os.path.basename(os.path.dirname(args.test_path))
                 save_checkpoint(model, test_dir_name, epoch, val_accuracy) 
