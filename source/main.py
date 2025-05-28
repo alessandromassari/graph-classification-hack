@@ -49,7 +49,7 @@ def main(args):
     create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
-    in_dim  = 8             # previous val: 32 node_feature
+    in_dim  = 4             # 4 node_feature don't modify - to be solved
     hid_dim = 128
     lat_dim = 16            # previous val: 8
     out_classes = 6
