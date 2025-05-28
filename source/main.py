@@ -28,13 +28,15 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
                 correct += (pred == data.y).sum().item()
                 total += data.y.size(0)
                 classification_loss = F.cross_entropy(class_logits, data.y)
-                total_loss += classification_loss
+                total_loss += classification_loss.item()
                 
     if calculate_accuracy:
-        if total > 0:
+        if total > 0 and len(data_loader) > 0:
             accuracy = correct / total 
-            avg_loss = total_loss / total 
-        else: accuracy = 0.0
+            avg_loss = total_loss / len(data_loader) 
+        else: 
+            accuracy = 0.0
+            avg_loss = 0.0
         return accuracy, avg_loss, predictions
     return predictions
 
@@ -113,7 +115,7 @@ def main(args):
             val_accuracy = 0.0
             # evaluate on validation set every 5 epoches
             if (epoch+1) % 5 == 0 or epoch == num_epoches - 1:
-                val_accuray, val_loss, _ = evaluate(val_loader,model,device,calculate_accuracy=True)
+                val_accuracy, val_loss, _ = evaluate(val_loader,model,device,calculate_accuracy=True)
                 print(f"VALIDATION: Epoch {epoch + 1}/{num_epoches}, Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.4f}")
                 test_dir_name = os.path.basename(os.path.dirname(args.test_path))
                 save_checkpoint(model, test_dir_name, epoch) 
