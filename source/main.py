@@ -51,14 +51,14 @@ def main(args):
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim  = 8             # previous val: 32 node_feature
     hid_dim = 128
-    lat_dim = 8             # 16
+    lat_dim = 16            # previous val: 8
     out_classes = 6
     edge_feat_dim = 7
-    hid_edge_nn_dim = 64    # 32
+    hid_edge_nn_dim = 64    # previous val: 32
     hid_dim_classifier = 64
     
-    pretrain_epoches = 10  # previous val: 10
-    num_epoches      = 40  # previous val: 10
+    pretrain_epoches = 20  # previous val: 10 - 20
+    num_epoches      = 80  # previous val: 10 - 20 - 40
     learning_rate = 0.0005 # previous val: 0.001
     bas = 32 #batch size:  # previous val: 64 
     kl_weight_max = 0.01  # previous val: 0.005
