@@ -78,13 +78,13 @@ def main(args):
     logs_counter = 0
     
     # Prepare test dataset and loader
-    test_dataset = GraphDataset(args.test_path, in_dim)
+    test_dataset = GraphDataset(args.test_path)
     test_loader = DataLoader(test_dataset, batch_size=bas, shuffle=False)
 
      # If train_path is provided then train on it
     if args.train_path:
         print(f">> Starting the train of the model using the following train set: {args.train_path}")
-        all_train_dataset = GraphDataset(args.train_path, in_dim)
+        all_train_dataset = GraphDataset(args.train_path)
         all_train_index = list(range(len(all_train_dataset)))
         train_index, val_index = train_test_split(all_train_index,test_size=0.2,random_state=42)
         
