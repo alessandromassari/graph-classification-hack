@@ -8,6 +8,7 @@ from goto_the_gym import pretraining, train
 from utilities import create_dirs, save_checkpoint, add_zeros
 from my_model import VGAE_all, gen_node_features
 from sklearn.model_selection import train_test_split
+import torch.nn.functional as F
 
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
