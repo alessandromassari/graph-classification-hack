@@ -79,7 +79,7 @@ def main(args):
         print(f">> Starting the train of the model using the following train set: {args.train_path}")
         all_train_dataset = GraphDataset(args.train_path, transform=node_feat_transf) #add_zeros
         all_train_index = list(range(len(all_train_dataset)))
-        train_index, val_index = train_test_split(all_train_index,val_size=0.2,random_state=42)
+        train_index, val_index = train_test_split(all_train_index,test_size=0.2,random_state=42)
         
         # split the training set in training and validation set
         train_dataset = torch.utils.data.Subset(all_train_dataset, train_index)
