@@ -36,23 +36,32 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     return recon_loss
 
 # a new loss: huber loss instead of reconstruction loss
-def reconstruction_huber_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1, beta=1.0):
-    positive_logits = adj_pred[edge_index[0], edge_index[1]]
-    positive_labels = torch.ones_like(positive_logits)
-
+def reconstruction_huber_loss(z, edge_index, model_decoder, num_nodes, num_neg_samp=1, beta=1.0):
+    """
+    Ricostruzione edge-wise con Huber loss tra z e all_edges (positivi + negativi).
+    """
+    # Campiona archi negativi
     neg_edge_index = negative_sampling(
         edge_index,
-        num_nodes = num_nodes,
-        num_neg_samples = edge_index.size(1)*num_neg_samp)
-    # as for positive but for negative edges
-    negative_logits = adj_pred[neg_edge_index[0],neg_edge_index[1]]
-    negative_labels = torch.zeros_like(negative_logits)
+        num_nodes=num_nodes,
+        num_neg_samples=edge_index.size(1) * num_neg_samp
+    )
 
-    all_the_logits = torch.cat([positive_logits, negative_logits])
-    all_the_labels = torch.cat([positive_labels, negative_labels])
-    huber = SmoothL1Loss(beta=beta, reduction='mean')
-    
-    return huber(all_the_logits, all_the_labels)
+    # Concatenazione: archi positivi + negativi
+    all_edges = torch.cat([edge_index, neg_edge_index], dim=1)
+
+    # Decoder edge-wise: score per ogni edge
+    adj_pred = model_decoder(z, all_edges)
+
+    # Costruzione etichette: primi N positivi (1), poi negativi (0)
+    num_positive_edges = edge_index.size(1)
+    positive_labels = torch.ones(num_positive_edges, device=z.device)
+    negative_labels = torch.zeros(adj_pred.size(0) - num_positive_edges, device=z.device)
+    all_labels = torch.cat([positive_labels, negative_labels], dim=0)
+
+    # Huber loss
+    huber = SmoothL1Loss(beta=beta)
+    return huber(adj_pred, all_labels)
     
 # Pre training procedure - no classifiers here
 def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_kl):
@@ -84,8 +93,8 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
         #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
-        reconstruction_loss = reconstruction_huber_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1, beta=1.0)
-
+        reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
+        
         #total pretraining loss
         loss = kl_weight*kl_term_loss + reconstruction_loss
         loss.backward()
@@ -137,8 +146,8 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
         #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
-        reconstruction_loss = reconstruction_huber_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1, beta=1.0)
-
+        reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
+        
         #total loss
         loss = classification_loss + kl_weight*kl_term_loss + recon_weight*reconstruction_loss
         loss.backward()
