@@ -49,7 +49,7 @@ class VGAE_encoder(nn.Module):   #- DA FARE CHECK
             nn.Linear(hid_edge_nn_dim, hid_dim*lat_dim)
         )
         self.conv_logvar = NNConv(hid_dim,lat_dim,nn_logvar_edge_maps, aggr='sum') # test aggr='mean'
-        self.dropout = nn.Dropout(0.2) # 20% dropout
+        self.dropout = nn.Dropout(0.3) # 20% previous dropout
         
     def forward(self, x, edge_index, edge_attr):
         h = F.relu(self.conv1(x, edge_index, edge_attr))
@@ -85,7 +85,7 @@ class VGAE_all(nn.Module):
             nn.Linear(lat_dim, hid_dim_classifier),
             nn.ReLU(),
             # add a 10% dropout to avoid/mitigate overfitting - try diff values 
-            nn.Dropout(0.1),
+            nn.Dropout(0.2), #10% previous dropout
             nn.Linear(hid_dim_classifier, out_classes)
         )
                      
