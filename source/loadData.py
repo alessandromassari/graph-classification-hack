@@ -55,7 +55,7 @@ def dictToGraphObject(graph_dict):
     # Features 3 and 4 intentionally left blank
     node_features = torch.cat([node_deg, node_inv_deg], dim=1)
     if node_features.size(1) < node_feat_size:
-        pad = torch.ones(num_nodes, node_feat_max_size - node_features.size(1))
+        pad = torch.ones(num_nodes, node_feat_size - node_features.size(1))
         node_features = torch.cat([node_feature, pad], dim=1)
 
     data.x = node_features
