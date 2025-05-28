@@ -51,7 +51,7 @@ def main(args):
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
     in_dim  = 4                 # 4 node_feature don't modify - to be solved
     hid_dim = 256               # previous val: 128
-    lat_dim = 16                # previous val: 8 - 16
+    lat_dim = 32                # previous val: 8 - 16
     out_classes = 6
     edge_feat_dim = 7
     hid_edge_nn_dim = 128        # previous val: 32 - 64
@@ -61,7 +61,7 @@ def main(args):
     num_epoches      = 80      # previous val: 10 - 20 - 40
     learning_rate = 0.0005     # previous val: 0.001
     bas = 32 #batch size:      # previous val: 64 
-    kl_weight_max = 0.01       # previous val: 0.005
+    kl_weight_max = 0.001       # previous val: 0.01 - 0.005
     an_ep_kl = 20
     torch.manual_seed(0)
 
