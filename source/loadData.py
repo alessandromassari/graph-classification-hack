@@ -50,10 +50,11 @@ def dictToGraphObject(graph_dict):
     node_deg = degree(data.edge_index[0], num_nodes=num_nodes, dtype=torch.float).view(-1,1)
 
     # Feature 2: inverse degree
-    node_inv_deg = 1.0 / (node_deg + 1e-7)
+    #node_inv_deg = 1.0 / (node_deg + 1e-7)
 
     # Features 3 and 4 intentionally left blank
-    node_features = torch.cat([node_deg, node_inv_deg], dim=1)
+    # node_features = torch.cat([node_deg, node_inv_deg], dim=1)
+    node_features = torch.cat([node_deg], dim=1)
     if node_features.size(1) < node_feat_size:
         pad = torch.ones(num_nodes, node_feat_size - node_features.size(1))
         node_features = torch.cat([node_features, pad], dim=1)
