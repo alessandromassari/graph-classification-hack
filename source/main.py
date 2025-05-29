@@ -10,8 +10,6 @@ from my_model import VGAE_all
 from sklearn.model_selection import train_test_split
 import torch.nn.functional as F
 
-from plot_cluster import plot_latent_z
-
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
     correct = 0
@@ -104,8 +102,6 @@ def main(args):
             train_accuracy, _, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"PRETRAINING: Epoch {epoch + 1}/{pretrain_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
         print(f"--- Pre-training Completed ---")
-
-        plot_latent_z(model, dataset=train_dataset, device=device, method='pca')
 
         # -----------   Training loop   ------------ #
         for epoch in range(num_epoches):
