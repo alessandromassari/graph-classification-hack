@@ -3,30 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GCNConv, NNConv, global_mean_pool
 from torch_geometric.utils import to_dense_adj
-"""
-# node features gen class - mi piaceva metterla qui anche se è più "data preparation"
-class gen_node_features(object):
-    def __init__(self, feat_dim):
-        self.feat_dim = feat_dim
-    def __call__(self, data):
-        # generate node features if not exist
-        if not hasattr(data, 'x') or data.x is None:
-            num_nodes = 0 # Default a 0 nodi
-            if hasattr(data, 'num_nodes') and data.num_nodes is not None:
-                num_nodes = data.num_nodes
-            elif hasattr(data, 'edge_index') and data.edge_index is not None and data.edge_index.numel() > 0:
-                num_nodes = data.edge_index.max().item() + 1
-            
-            if num_nodes > 0:
-                data.x = torch.ones((num_nodes, self.feat_dim), dtype=torch.float)
-            else:
-                # Se non ci sono nodi validi o edge_index, crea un tensore vuoto per data.x
-                data.x = torch.empty((0, self.feat_dim), dtype=torch.float)
-                print(f"Warning: Graph has no nodes or edges. Initializing data.x with an empty tensor for graph with y={data.y if hasattr(data, 'y') else 'N/A'}.")
 
-        data.x = torch.nan_to_num(data.x, nan=0.0)
-        return data
-"""
 # Encoder class
 class VGAE_encoder(nn.Module):   #- DA FARE CHECK 
     def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=32):
@@ -96,7 +73,10 @@ class VGAE_all(nn.Module):
             nn.ReLU(),
             # add a 10% dropout to avoid/mitigate overfitting - try diff values 
             nn.Dropout(0.2), #10% previous dropout
-            nn.Linear(hid_dim_classifier, out_classes)
+            nn.Linear(hid_dim_classifier, 64),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(64,out_classes)
         )
                      
     #  maybe possiamo inserire qui la parte di concatenazione in decoder invece di goto_the_gym.py
