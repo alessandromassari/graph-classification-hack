@@ -5,31 +5,46 @@ from torch_geometric.nn import GCNConv, NNConv, global_mean_pool
 from torch_geometric.utils import to_dense_adj
 
 # Encoder class
-class VGAE_encoder(nn.Module):   #- DA FARE CHECK 
-    def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=32):
+class VGAE_encoder(nn.Module):
+    def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=128):
         super().__init__()
+        # primo conv come prima
         nn1_edge_maps = nn.Sequential(
             nn.Linear(edge_feat_dim, hid_edge_nn_dim),
             nn.ReLU(),
-            nn.Linear(hid_edge_nn_dim, in_dim*hid_dim)    # to check this
+            nn.Linear(hid_edge_nn_dim, in_dim * hid_dim)
         )
-        self.conv1 = NNConv(in_dim, hid_dim, nn1_edge_maps, aggr='mean') #try with sum
+        self.conv1 = NNConv(in_dim, hid_dim, nn1_edge_maps, aggr='mean')
+        
+        # NUOVO conv2
+        nn2_edge_maps = nn.Sequential(
+            nn.Linear(edge_feat_dim, hid_edge_nn_dim),
+            nn.ReLU(),
+            nn.Linear(hid_edge_nn_dim, hid_dim * hid_dim)
+        )
+        self.conv2 = NNConv(hid_dim, hid_dim, nn2_edge_maps, aggr='mean')
+        
+        # head per mu e logvar
         nn_mu_edge_maps = nn.Sequential(
             nn.Linear(edge_feat_dim, hid_edge_nn_dim),
             nn.ReLU(),
-            nn.Linear(hid_edge_nn_dim, hid_dim*lat_dim) 
+            nn.Linear(hid_edge_nn_dim, hid_dim * lat_dim)
         )
-        self.conv_mu = NNConv(hid_dim,lat_dim, nn_mu_edge_maps, aggr='sum') # test aggr='mean'
+        self.conv_mu = NNConv(hid_dim, lat_dim, nn_mu_edge_maps, aggr='sum')
+        
         nn_logvar_edge_maps = nn.Sequential(
             nn.Linear(edge_feat_dim, hid_edge_nn_dim),
             nn.ReLU(),
-            nn.Linear(hid_edge_nn_dim, hid_dim*lat_dim)
+            nn.Linear(hid_edge_nn_dim, hid_dim * lat_dim)
         )
-        self.conv_logvar = NNConv(hid_dim,lat_dim,nn_logvar_edge_maps, aggr='sum') # test aggr='mean'
-        self.dropout = nn.Dropout(0.2) # 20% previous dropout
+        self.conv_logvar = NNConv(hid_dim, lat_dim, nn_logvar_edge_maps, aggr='sum')
+        
+        self.dropout = nn.Dropout(0.2)
         
     def forward(self, x, edge_index, edge_attr):
         h = F.relu(self.conv1(x, edge_index, edge_attr))
+        h = self.dropout(h)
+        h = F.relu(self.conv2(h, edge_index, edge_attr))  # nuovo layer
         h = self.dropout(h)
         # compute node level mean and logvar
         mu = self.conv_mu(h, edge_index, edge_attr)
@@ -73,10 +88,7 @@ class VGAE_all(nn.Module):
             nn.ReLU(),
             # add a 10% dropout to avoid/mitigate overfitting - try diff values 
             nn.Dropout(0.2), #10% previous dropout
-            nn.Linear(hid_dim_classifier, 64),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(64,out_classes)
+            nn.Linear(hid_dim_classifier, out_classes)
         )
                      
     #  maybe possiamo inserire qui la parte di concatenazione in decoder invece di goto_the_gym.py
