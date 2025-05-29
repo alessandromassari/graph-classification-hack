@@ -149,7 +149,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
         
         #total loss
-        loss = classification_loss + kl_weight*kl_term_loss + recon_weight*reconstruction_loss
+        loss = classification_loss + 0*kl_weight*kl_term_loss + recon_weight*reconstruction_loss
         loss.backward()
         optimizer.step()
 
