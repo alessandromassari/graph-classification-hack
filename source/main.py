@@ -10,6 +10,8 @@ from my_model import VGAE_all
 from sklearn.model_selection import train_test_split
 import torch.nn.functional as F
 
+from plot_cluster import plot_latent_z
+
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
     correct = 0
@@ -57,7 +59,7 @@ def main(args):
     hid_edge_nn_dim = 128       # previous val: 32 - 64
     hid_dim_classifier = 64     # previous val: 64
     
-    pretrain_epoches = 10      # previous val: 10 - 20 (20 is the best one)
+    pretrain_epoches = 5      # previous val: 10 - 20 (20 is the best one)
     num_epoches      = 80      # previous val: 10 - 20 - 40
     learning_rate = 0.0005     # previous val: 0.001
     bas = 16 #batch size:      # previous val: 32 - 64
