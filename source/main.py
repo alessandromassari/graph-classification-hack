@@ -102,7 +102,9 @@ def main(args):
             train_accuracy, _, _ = evaluate(train_loader, model, device, calculate_accuracy=True)
             print(f"PRETRAINING: Epoch {epoch + 1}/{pretrain_epoches}, Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
         print(f"--- Pre-training Completed ---")
-        
+
+        plot_latent_z(model, dataset=train_dataset, device=device, method='pca')
+
         # -----------   Training loop   ------------ #
         for epoch in range(num_epoches):
             train_loss = train(model,train_loader, optimizer, device, kl_weight_max, epoch,an_ep_kl)
