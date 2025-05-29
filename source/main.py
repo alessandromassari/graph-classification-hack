@@ -54,7 +54,7 @@ def main(args):
     lat_dim = 32                # previous val: 8 - 16
     out_classes = 6
     edge_feat_dim = 7
-    hid_edge_nn_dim = 128       # previous val: 32 - 64
+    hid_edge_nn_dim = 64       # previous val: 32 - 64
     hid_dim_classifier = 64     # previous val: 64
     
     pretrain_epoches = 10      # previous val: 10 - 20 (20 is the best one)
