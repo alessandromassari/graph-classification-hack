@@ -85,11 +85,16 @@ class VGAE_all(nn.Module):
         self.decoder = VGAE_decoder()
         self.classifier = nn.Sequential(
             nn.Linear(lat_dim, hid_dim_classifier),
-            nn.LayerNorm(),
+            nn.LayerNorm(hid_dim_classifier),
             nn.ReLU(),
             # add a 10% dropout to avoid/mitigate overfitting - try diff values 
             nn.Dropout(0.3), #20% previous dropout
-            nn.Linear(hid_dim_classifier, out_classes)
+
+            nn.Linear(hid_dim_classifier,hid_dim_classifier//2),
+            nn.LayerNorm(hid_dim_classifier//2),
+            nn.Relu(),
+            nn.Dropout(0.3),
+            nn.Linear(hid_dim_classifier//2, out_classes)
         )
                      
     #  maybe possiamo inserire qui la parte di concatenazione in decoder invece di goto_the_gym.py
