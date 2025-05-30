@@ -17,7 +17,7 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
     total = 0
     predictions = []
     total_loss = 0.0
-    focal = FocalLoss(gamma=2.0).to(device)
+    focal = FocalLoss(gamma=2.0)
     
     with torch.no_grad():
         for data in data_loader:
