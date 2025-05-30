@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from torch_geometric.utils import to_dense_adj, negative_sampling
 from my_model import VGAE_all
 from torch.nn import SmoothL1Loss
-
+from losses import FocalLoss
 # reconstruction loss weight - DA SPOSTARE DA QUI
 recon_weight = 0.2 # previous value: 0.8
 focal = FocalLoss(gamma=2.0).to(device)
