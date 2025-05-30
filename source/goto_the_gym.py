@@ -8,7 +8,7 @@ from torch.nn import SmoothL1Loss
 from losses import FocalLoss
 # reconstruction loss weight - DA SPOSTARE DA QUI
 recon_weight = 0.2 # previous value: 0.8
-focal = FocalLoss(gamma=2.0).to(device)
+focal = FocalLoss(gamma=2.0)
 
 # our beloved Kullback-Leibler term loss
 def kl_loss(mu, logvar):
