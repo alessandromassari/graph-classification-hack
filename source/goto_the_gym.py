@@ -140,7 +140,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         else:
             target_y = data.y
         #classification_loss = F.cross_entropy(class_logits, target_y) 
-         classification_loss = focal(class_logits, target_y)
+        classification_loss = focal(class_logits, target_y)
         
         #KL term loss - NOT USED IN TRAINING TRY AND THEN DELETE IF WORKS
         #kl_term_loss = kl_loss(mu, logvar)
