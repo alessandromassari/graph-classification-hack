@@ -60,7 +60,7 @@ class VGAE_decoder(nn.Module):
         adj_pred = torch.sigmoid(torch.mm(z, z.t()))
         return adj_pred
 """
-# Decoder class
+# Decoder class: less is more
 class VGAE_decoder(nn.Module):
     def __init__(self):
         super().__init__()
@@ -79,15 +79,16 @@ def reparametrize(mu, logvar):
 # final class all the model here   - new release: from CGNConv to NNConv
 class VGAE_all(nn.Module):
     def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=32, 
-                 out_classes=6, hid_dim_classifier=64):
+                 out_classes=6, hid_dim_classifier=128):
         super().__init__()
         self.encoder = VGAE_encoder(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim)
         self.decoder = VGAE_decoder()
         self.classifier = nn.Sequential(
             nn.Linear(lat_dim, hid_dim_classifier),
+            nn.LayerNorm(),
             nn.ReLU(),
             # add a 10% dropout to avoid/mitigate overfitting - try diff values 
-            nn.Dropout(0.2), #10% previous dropout
+            nn.Dropout(0.3), #20% previous dropout
             nn.Linear(hid_dim_classifier, out_classes)
         )
                      
