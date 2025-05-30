@@ -9,6 +9,7 @@ from utilities import create_dirs, save_checkpoint, add_zeros
 from my_model import VGAE_all
 from sklearn.model_selection import train_test_split
 import torch.nn.functional as F
+from losses import FocalLoss
 
 def evaluate(data_loader, model, device, calculate_accuracy=False):
     model.eval()
