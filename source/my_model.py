@@ -92,7 +92,7 @@ class VGAE_all(nn.Module):
 
             nn.Linear(hid_dim_classifier,hid_dim_classifier//2),
             nn.LayerNorm(hid_dim_classifier//2),
-            nn.Relu(),
+            nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(hid_dim_classifier//2, out_classes)
         )
