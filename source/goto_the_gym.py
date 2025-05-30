@@ -7,7 +7,8 @@ from my_model import VGAE_all
 from torch.nn import SmoothL1Loss
 
 # reconstruction loss weight - DA SPOSTARE DA QUI
-recon_weight = 0.5 # previous value: 0.8
+recon_weight = 0.2 # previous value: 0.8
+focal = FocalLoss(gamma=2.0).to(device)
 
 # our beloved Kullback-Leibler term loss
 def kl_loss(mu, logvar):
@@ -35,7 +36,7 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
     recon_loss = F.binary_cross_entropy(all_the_logits,all_the_labels)
     return recon_loss
 
-# a new loss: huber loss instead of reconstruction loss
+# a new loss: huber loss instead of reconstruction loss - FORSE DA CANCELLARE 
 def reconstruction_huber_loss(z, edge_index, model_decoder, num_nodes, num_neg_samp=1, beta=1.0):
     """
     Ricostruzione edge-wise con Huber loss tra z e all_edges (positivi + negativi).
@@ -92,8 +93,8 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         #KL term loss 
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
-        reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
+        reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        #reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
         
         #total pretraining loss
         loss = kl_weight*kl_term_loss + reconstruction_loss
@@ -138,13 +139,14 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
             target_y = data.y.squeeze(1)
         else:
             target_y = data.y
-        classification_loss = F.cross_entropy(class_logits, target_y) 
+        #classification_loss = F.cross_entropy(class_logits, target_y) 
+         classification_loss = focal(class_logits, target_y)
         
         #KL term loss - NOT USED IN TRAINING TRY AND THEN DELETE IF WORKS
         #kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
-        reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
+        reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        #reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
         
         #total loss
         loss = classification_loss + recon_weight*reconstruction_loss
