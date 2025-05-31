@@ -50,16 +50,7 @@ class VGAE_encoder(nn.Module):
         mu = self.conv_mu(h, edge_index, edge_attr)
         logvar = self.conv_logvar(h, edge_index, edge_attr)
         return mu, logvar
-"""
-# Decoder class
-class VGAE_decoder(nn.Module):
-    def __init__(self):
-        super().__init__()
-        
-    def forward(self, z):
-        adj_pred = torch.sigmoid(torch.mm(z, z.t()))
-        return adj_pred
-"""
+
 # Decoder class: less is more
 class VGAE_decoder(nn.Module):
     def __init__(self):
