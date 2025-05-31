@@ -71,7 +71,7 @@ class VGAE_decoder(nn.Module):
         return torch.sigmoid(score)
         
 def reparametrize(mu, logvar):
-    logvar = torch.clamp(logvar, min=-5.0, max=5.0) # after debug print
+    logvar = torch.clamp(logvar, min=-10.0, max=10.0) # after debug print
     std = torch.exp(0.5 * logvar)
     eps = torch.randn_like(std)
     return mu + eps*std
@@ -79,19 +79,26 @@ def reparametrize(mu, logvar):
 # final class all the model here   - new release: from CGNConv to NNConv
 class VGAE_all(nn.Module):
     def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=32, 
-                 out_classes=6, hid_dim_classifier=128):
+                 out_classes=6, hid_dim_classifier=64):
         super().__init__()
         self.encoder = VGAE_encoder(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim)
         self.decoder = VGAE_decoder()
+
+        self.edge_attr_decoder = nn.Sequential(
+            nn.Linear(lat_dim*2, lat_dim),
+            nn.LeakyReLU(0.15)
+            nn.Linear(lat_dim, edge_feat_dim)
+        )
+                     
         self.classifier = nn.Sequential(
             nn.Linear(lat_dim, hid_dim_classifier),
             nn.LayerNorm(hid_dim_classifier),
             nn.ReLU(),
-            # add a 10% dropout to avoid/mitigate overfitting - try diff values 
+            # add a dropout to avoid/mitigate overfitting - try diff values 
             nn.Dropout(0.3), #20% previous dropout
-
+            
             nn.Linear(hid_dim_classifier,hid_dim_classifier//2),
-            nn.LayerNorm(hid_dim_classifier//2),
+            # nn.LayerNorm(hid_dim_classifier//2),    - COMMENTATO 
             nn.ReLU(),
             nn.Dropout(0.3),
             nn.Linear(hid_dim_classifier//2, out_classes)
