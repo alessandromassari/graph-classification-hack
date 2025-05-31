@@ -2,6 +2,27 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder):
+
+    adj_logits = torch.matmul(z, z.t())           # [N, N]
+    adj_pred = torch.sigmoid(adj_logits)
+
+    N = z.size(0)
+    device = z.device
+    adj_true = torch.zeros((N, N), device=device)
+    row, col = edge_index
+    adj_true[row, col] = 1.0
+    bce_loss = F.binary_cross_entropy(adj_pred, adj_true)
+
+    z_pair = torch.cat([z[row], z[col]], dim=-1)           # [E, lat_dim*2]
+    edge_attr_pred = edge_attr_decoder(z_pair)             # [E, edge_feat_dim]
+
+    # 4) MSE Loss per gli attributi degli archi
+    mse_loss = F.mse_loss(edge_attr_pred, edge_attr)
+
+    # 5) Combinazione pesata delle due loss
+    return 0.1 * bce_loss + mse_loss
+
 class FocalLoss(nn.Module):
     """
     Focal Loss, come descritto in Lin et al. 2017:
