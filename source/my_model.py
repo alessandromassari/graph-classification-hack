@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv, NNConv, global_mean_pool
-from torch_geometric.utils import to_dense_adj
+from torch_geometric.nn import NNConv, global_mean_pool
+#from torch_geometric.utils import to_dense_adj
 
 # Encoder class
 class VGAE_encoder(nn.Module):
@@ -64,6 +64,8 @@ class VGAE_decoder(nn.Module):
 class VGAE_decoder(nn.Module):
     def __init__(self):
         super().__init__()
+
+        pass
         
     def forward(self, z, edge_index):
         src, dst = edge_index
@@ -83,11 +85,13 @@ class VGAE_all(nn.Module):
         super().__init__()
         self.encoder = VGAE_encoder(in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim)
         self.decoder = VGAE_decoder()
-
+                     
+        # new decoder specifically for edge_attr
         self.edge_attr_decoder = nn.Sequential(
             nn.Linear(lat_dim*2, lat_dim),
-            nn.LeakyReLU(0.15)
-            nn.Linear(lat_dim, edge_feat_dim)
+            nn.LeakyReLU(0.15),
+            nn.Linear(lat_dim, edge_feat_dim),
+            nn.Sigmoid()
         )
                      
         self.classifier = nn.Sequential(
@@ -104,7 +108,6 @@ class VGAE_all(nn.Module):
             nn.Linear(hid_dim_classifier//2, out_classes)
         )
                      
-    #  maybe possiamo inserire qui la parte di concatenazione in decoder invece di goto_the_gym.py
     def forward(self, data, enable_classifier=True):
         x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
         
@@ -116,7 +119,10 @@ class VGAE_all(nn.Module):
         z = reparametrize(mu, logvar)
         #adj_pred = self.decoder(z) if z is not None else None 
         adj_pred = self.decoder(z, data.edge_index) if z is not None else None
-       
+        row, col = edge_index
+        z_pair = torch.cat([z[row], z[col]], dim=1)
+        edge_attr_pred = self.edge_attr_decoder(z_pair)
+        
         # pooling if classifier was enabled: in pre-training we work only with VGAE
         if enable_classifier:
             if z is None:
@@ -127,5 +133,5 @@ class VGAE_all(nn.Module):
         else:
             class_logits = None
             
-        return adj_pred, mu, logvar, class_logits, z
+        return adj_pred, edge_attr_pred, mu, logvar, class_logits, z
         
