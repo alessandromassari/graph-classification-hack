@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.utils import negative_sampling
 
-bce_weight = 0.2
+bce_weight = 0.4
 #bce loss 
 def compute_bce_loss(z, edge_index, decoder, num_nodes, num_neg_samples=1):
     """
