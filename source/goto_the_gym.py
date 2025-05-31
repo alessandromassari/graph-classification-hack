@@ -86,7 +86,7 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         optimizer.zero_grad()
 
         # new release update: pass whole data instead of .x ecc.
-        adj_pred,mu,logvar,class_logits, z = model(data, enable_classifier=False) 
+        adj_pred, edge_attr_pred, mu, logvar, class_logits, z = model(data, enable_classifier=False) 
 
         # just a check
         if adj_pred is None or mu is None or logvar is None:
