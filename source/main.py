@@ -57,7 +57,7 @@ def main(args):
     create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
-    in_dim  = 2               # 4 node_feature don't modify - to be solved
+    in_dim  = 2               # 2 node_feature don't modify - to be solved
     hid_dim = 128               # previous val: 128 - 64 works but 60% accuracy in 40 epochs
     lat_dim = 16                # previous val: 8 - 16
     out_classes = 6
@@ -66,7 +66,7 @@ def main(args):
     hid_dim_classifier = 80    # previous val: 64 - 128 non regge p100 :(
     
     pretrain_epoches = 10      # previous val: 10 - 20 (20 is the best one)
-    num_epoches      = 40      # previous val: 10 - 20 - 40 - 80 
+    num_epoches      = 40      # previous val: 40 - 80 should be more but i dont have time
     learning_rate = 0.0005     # previous val: 0.001
     bas = 16  #batch size:      # previous val: 16 - 32 - 64
     kl_weight_max = 0.01      # previous val: 0.01 - 0.005
