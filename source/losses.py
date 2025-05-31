@@ -41,7 +41,7 @@ def compute_bce_loss(z, edge_index, decoder, num_nodes, num_neg_samples=1):
     bce_loss = F.binary_cross_entropy(all_scores, all_labels)
     return bce_loss
 
-def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder, decoder):
+def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder, decoder, num_nodes):
 
     adj_logits = torch.matmul(z, z.t())           # [N, N]
     adj_pred = torch.sigmoid(adj_logits)
