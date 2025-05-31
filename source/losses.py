@@ -14,6 +14,7 @@ def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder):
     adj_true[row, col] = 1.0
     bce_loss = F.binary_cross_entropy(adj_pred, adj_true)
     """
+    row, col = edge_index
     z_pair = torch.cat([z[row], z[col]], dim=-1)           # [E, lat_dim*2]
     edge_attr_pred = edge_attr_decoder(z_pair)             # [E, edge_feat_dim]
 
