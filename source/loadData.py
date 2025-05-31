@@ -13,7 +13,7 @@ from torch_geometric.utils import from_networkx
 from torch_geometric.utils import to_networkx, degree
 
 # dimension of node_features
-node_feat_size = 4
+node_feat_size = 2
 
 class GraphDataset(Dataset):
     def __init__(self, filename, transform=None, pre_transform=None):
@@ -49,10 +49,8 @@ def dictToGraphObject(graph_dict):
     # Feature 1: degree
     node_deg = degree(data.edge_index[0], num_nodes=num_nodes, dtype=torch.float).view(-1,1)
 
-    # Feature 2: inverse degree
-    #node_inv_deg = 1.0 / (node_deg + 1e-7)
 
-    # Features 3 and 4 intentionally left blank
+    # Other features intentionally left blank
     # node_features = torch.cat([node_deg, node_inv_deg], dim=1)
     node_features = torch.cat([node_deg], dim=1)
     if node_features.size(1) < node_feat_size:
