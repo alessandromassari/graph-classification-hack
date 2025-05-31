@@ -1,8 +1,47 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch_geometric.utils import negative_sampling
 
-def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder):
+bce_weight = 0.2
+#bce loss 
+def compute_bce_loss(z, edge_index, decoder, num_nodes, num_neg_samples=1):
+    """
+    Calcola una BCE loss leggera tra:
+    - edge_index (positivi)
+    - archi negativi campionati
+
+    Args:
+        z: embedding latenti dei nodi [num_nodes, lat_dim]
+        edge_index: archi veri [2, num_edges]
+        decoder: modulo decoder da usare su (z, edge_index)
+        num_nodes: numero nodi (int)
+        num_neg_samples: moltiplicatore negativo (di solito 1)
+    """
+    device = z.device
+    # Score per gli archi reali (positivi)
+    pos_scores = decoder(z, edge_index)
+    pos_labels = torch.ones_like(pos_scores)
+
+    # Campionamento archi negativi
+    neg_edge_index = negative_sampling(
+        edge_index=edge_index,
+        num_nodes=num_nodes,
+        num_neg_samples=edge_index.size(1) * num_neg_samples,
+        method='sparse'
+    )
+    neg_scores = decoder(z, neg_edge_index)
+    neg_labels = torch.zeros_like(neg_scores)
+
+    # Concatenazione score/label
+    all_scores = torch.cat([pos_scores, neg_scores], dim=0)
+    all_labels = torch.cat([pos_labels, neg_labels], dim=0)
+
+    # Calcolo Binary Cross Entropy Loss
+    bce_loss = F.binary_cross_entropy(all_scores, all_labels)
+    return bce_loss
+
+def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder, decoder):
 
     adj_logits = torch.matmul(z, z.t())           # [N, N]
     adj_pred = torch.sigmoid(adj_logits)
@@ -14,6 +53,8 @@ def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder):
     adj_true[row, col] = 1.0
     bce_loss = F.binary_cross_entropy(adj_pred, adj_true)
     """
+    bce_loss = compute_bce_loss(z, edge_index, decoder, num_nodes, num_neg_samples=1)
+    
     row, col = edge_index
     z_pair = torch.cat([z[row], z[col]], dim=-1)           # [E, lat_dim*2]
     edge_attr_pred = edge_attr_decoder(z_pair)             # [E, edge_feat_dim]
@@ -22,7 +63,7 @@ def compute_recon_loss(z, edge_index, edge_attr, edge_attr_decoder):
     mse_loss = F.mse_loss(edge_attr_pred, edge_attr)
 
     # 5) Combinazione pesata delle due loss
-    return mse_loss # + 0.1 * bce_loss
+    return mse_loss + bce_weight * bce_loss
 
 class FocalLoss(nn.Module):
     """
