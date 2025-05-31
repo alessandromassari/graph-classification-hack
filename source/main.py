@@ -1,3 +1,5 @@
+# ROW 154 MUST BE CHANGED WITH YOUR DATAPATH: output_csv_path = os.path.join('/kaggle/working/', f"testset_{test_dir_name}.csv")
+
 import os
 import argparse
 import torch
