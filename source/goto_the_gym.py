@@ -9,7 +9,7 @@ from losses import FocalLoss,  compute_recon_loss
 
 
 # reconstruction loss weight - DA SPOSTARE DA QUI
-recon_weight = 0.2     # previous value: 0.2
+recon_weight = 0.08     # previous value: 0.2
 focal = FocalLoss(gamma=2.0)
 
 # our beloved Kullback-Leibler term loss
