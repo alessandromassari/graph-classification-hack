@@ -5,7 +5,7 @@ from torch_geometric.loader import DataLoader
 from loadData import GraphDataset
 import pandas as pd 
 from goto_the_gym import pretraining, train
-from utilities import create_dirs, save_checkpoint, add_zeros
+from utilities import create_dirs, save_checkpoint, add_zeros, log_epoch_stats
 from my_model import VGAE_all
 from sklearn.model_selection import train_test_split
 import torch.nn.functional as F
@@ -125,17 +125,13 @@ def main(args):
                 save_checkpoint(model, test_dir_name, epoch, val_accuracy) 
                 print(f"Checkpoint saved for epoch {epoch + 1} with validation accuracy: {val_accuracy:.4f}")
                 
-            print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
-            
-       
-      #  if (epoch < 5) or (train_loss < model_loss_min):
-    #       model_loss_min = train_loss
-    #       test_dir_name = os.path.basename(os.path.dirname(args.test_path))
-     #      save_checkpoint(model, test_dir_name, epoch)
+            # log every 10 epochs o all'ultima epoca
+            if (epoch + 1) % 10 == 0 or epoch == num_epoches - 1:
+                log_epoch_stats(test_dir_name, epoch + 1, train_loss, train_accuracy, val_loss, val_accuracy)
+                print(f"Logs saved for epoch {epoch + 1} in: {log_file_path}")
 
-        # SAVE LOGS EACH 10 EPOCHS TO BE COMPLETED 
-        #logs/: Log files for each training dataset. Include logs of accuracy and loss recorded every 10 epochs. # usare sempre test_dir_name
-        
+            print(f"TRAINING: Epoch {epoch + 1}/{num_epoches}, Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
+    
     # Else if train_path NOT provided 
     if not args.train_path:
         checkpoint_path = args.checkpoint
