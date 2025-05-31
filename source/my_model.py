@@ -113,10 +113,10 @@ class VGAE_all(nn.Module):
         
         adj_pred = self.decoder(z, data.edge_index) if z is not None else None
         
-        #row, col = edge_index
-        #z_pair = torch.cat([z[row], z[col]], dim=1)
-        #edge_attr_pred = self.edge_attr_decoder(z_pair)
-        edge_attr_pred = self.edge_attr_decoder(z, data.edge_index)
+        row, col = edge_index
+        z_pair = torch.cat([z[row], z[col]], dim=1)
+        edge_attr_pred = self.edge_attr_decoder(z_pair)
+        #edge_attr_pred = self.edge_attr_decoder(z, data.edge_index)
         
         # pooling if classifier was enabled: in pre-training we work only with VGAE
         if enable_classifier:
