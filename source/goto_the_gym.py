@@ -68,7 +68,7 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         #KL term loss 
         kl_term_loss = kl_loss(mu, logvar)
         #reconstruction loss 
-        #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
+        
         #reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
         reconstruction_loss = compute_recon_loss(z, data.edge_index, data.edge_attr,model.edge_attr_decoder, model.decoder, num_nodes=data.x.size(0))
         #total pretraining loss
