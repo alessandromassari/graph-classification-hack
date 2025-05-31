@@ -8,6 +8,7 @@ from torch_geometric.nn import NNConv, global_mean_pool
 class VGAE_encoder(nn.Module):
     def __init__(self, in_dim, hid_dim, lat_dim, edge_feat_dim, hid_edge_nn_dim=128):
         super().__init__()
+        
         # primo conv come prima
         nn1_edge_maps = nn.Sequential(
             nn.Linear(edge_feat_dim, hid_edge_nn_dim),
@@ -51,6 +52,12 @@ class VGAE_encoder(nn.Module):
         logvar = self.conv_logvar(h, edge_index, edge_attr)
         return mu, logvar
 
+def reparametrize(mu, logvar):
+    logvar = torch.clamp(logvar, min=-10.0, max=10.0) # after debug print
+    std = torch.exp(0.5 * logvar)
+    eps = torch.randn_like(std)
+    return mu + eps*std
+    
 # Decoder class: less is more
 class VGAE_decoder(nn.Module):
     def __init__(self):
@@ -63,11 +70,6 @@ class VGAE_decoder(nn.Module):
         score = (z[src] * z[dst]).sum(dim=-1)
         return torch.sigmoid(score)
         
-def reparametrize(mu, logvar):
-    logvar = torch.clamp(logvar, min=-10.0, max=10.0) # after debug print
-    std = torch.exp(0.5 * logvar)
-    eps = torch.randn_like(std)
-    return mu + eps*std
 
 # final class all the model here   - new release: from CGNConv to NNConv
 class VGAE_all(nn.Module):
@@ -108,11 +110,13 @@ class VGAE_all(nn.Module):
             
         mu, logvar = self.encoder(x, edge_index, edge_attr)
         z = reparametrize(mu, logvar)
-        #adj_pred = self.decoder(z) if z is not None else None 
+        
         adj_pred = self.decoder(z, data.edge_index) if z is not None else None
-        row, col = edge_index
-        z_pair = torch.cat([z[row], z[col]], dim=1)
-        edge_attr_pred = self.edge_attr_decoder(z_pair)
+        
+        #row, col = edge_index
+        #z_pair = torch.cat([z[row], z[col]], dim=1)
+        #edge_attr_pred = self.edge_attr_decoder(z_pair)
+        edge_attr_pred = self.edge_attr_decoder(z, data.edge_index)
         
         # pooling if classifier was enabled: in pre-training we work only with VGAE
         if enable_classifier:
