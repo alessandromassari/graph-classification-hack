@@ -18,12 +18,12 @@ def evaluate(data_loader, model, device, calculate_accuracy=False):
     predictions = []
     total_loss = 0.0
     focal = FocalLoss(gamma=2.0)
-    
+   
     with torch.no_grad():
         for data in data_loader:
             data = data.to(device)
             output = model(data, enable_classifier=True)
-            class_logits = output[3]
+            class_logits = output[4]
             pred = class_logits.argmax(dim=1)
             predictions.extend(pred.cpu().numpy())
             if calculate_accuracy:
