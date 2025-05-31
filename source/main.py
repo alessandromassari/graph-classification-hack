@@ -47,13 +47,16 @@ def main(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print("device:", device)
     print(f"Current GPU: {torch.cuda.get_device_name(0)}")
+
+    # force to use all the memory
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
     
     # create directories
     create_dirs()
     
     # Hyperparameters for the model (circa a ctrl+c - ctrl+v from competiton GitHub)
-    in_dim  = 4                 # 4 node_feature don't modify - to be solved
-    hid_dim = 128               # previous val: 128
+    in_dim  = 2               # 4 node_feature don't modify - to be solved
+    hid_dim = 64               # previous val: 128
     lat_dim = 16                # previous val: 8 - 16
     out_classes = 6
     edge_feat_dim = 7
