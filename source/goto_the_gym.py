@@ -41,9 +41,9 @@ def eval_reconstruction_loss(adj_pred, edge_index, num_nodes, num_neg_samp=1):
 
 # a new loss: huber loss instead of reconstruction loss - FORSE DA CANCELLARE 
 """def reconstruction_huber_loss(z, edge_index, model_decoder, num_nodes, num_neg_samp=1, beta=1.0):
-    """
-    Ricostruzione edge-wise con Huber loss tra z e all_edges (positivi + negativi).
-    """
+    
+    #Ricostruzione edge-wise con Huber loss tra z e all_edges (positivi + negativi).
+    
     # Campiona archi negativi
     neg_edge_index = negative_sampling(
         edge_index,
@@ -98,7 +98,7 @@ def pretraining(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, a
         #reconstruction loss 
         #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
         #reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
-        reconstruction_loss = compute_recon_loss(z, data.edge_index, data.edge_attr)
+        reconstruction_loss = compute_recon_loss(z, data.edge_index, data.edge_attr,model.edge_attr_decoder)
 
         #total pretraining loss
         loss = kl_weight*kl_term_loss + reconstruction_loss
@@ -151,7 +151,7 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         #reconstruction loss 
         #reconstruction_loss = eval_reconstruction_loss(adj_pred, data.edge_index, data.x.size(0), num_neg_samp=1)
         #reconstruction_loss = reconstruction_huber_loss(z=z,edge_index=data.edge_index,model_decoder=model.decoder,num_nodes=data.x.size(0),num_neg_samp=1,beta=1.0)
-        reconstruction_loss = compute_recon_loss(z, data.edge_index, data.edge_attr)
+        reconstruction_loss = compute_recon_loss(z, data.edge_index, data.edge_attr,model.edge_attr_decoder)
 
         #total loss
         loss = classification_loss + recon_weight*reconstruction_loss
@@ -165,6 +165,6 @@ def train(model, td_loader, optimizer, device, kl_weight_max, cur_epoch, an_ep_k
         preds = torch.argmax(class_logits, dim=1)
         total_guessed_pred += (preds == target_y).sum().item()
         total_worked_graphs += data.num_graphs 
-        ep_accuracy = total_guessed_pred / total_worked_graphs # NOT USED
+        # NOT USED
         
     return total_loss/len(td_loader)
