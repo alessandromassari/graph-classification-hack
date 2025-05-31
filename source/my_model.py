@@ -99,12 +99,12 @@ class VGAE_all(nn.Module):
             nn.LayerNorm(hid_dim_classifier),
             nn.ReLU(),
             # add a dropout to avoid/mitigate overfitting - try diff values 
-            nn.Dropout(0.3), #20% previous dropout
+            nn.Dropout(0.2), #20% previous dropout
             
             nn.Linear(hid_dim_classifier,hid_dim_classifier//2),
             # nn.LayerNorm(hid_dim_classifier//2),    - COMMENTATO 
             nn.ReLU(),
-            nn.Dropout(0.3),
+            nn.Dropout(0.2),
             nn.Linear(hid_dim_classifier//2, out_classes)
         )
                      
