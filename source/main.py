@@ -64,7 +64,7 @@ def main(args):
     num_epoches      = 40      # previous val: 10 - 20 - 40 - 80
     learning_rate = 0.0005     # previous val: 0.001
     bas = 16 #batch size:      # previous val: 32 - 64
-    kl_weight_max = 0.005      # previous val: 0.01 - 0.005
+    kl_weight_max = 0.01      # previous val: 0.01 - 0.005
     an_ep_kl = 20
     torch.manual_seed(0)
 
